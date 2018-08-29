@@ -1,0 +1,343 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="e:\vs2015\team tools\static analysis tools\fxcop\Xml\CodeAnalysisReport.xsl"?>
+<FxCopReport Version="14.0">
+ <Targets>
+  <Target Name="C:\Users\Demin.Liu\AppData\Local\Temp\tmpEFCA.tmp.cadir\bin\App_Code.dll">
+   <Modules>
+    <Module Name="app_code.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="DecryptUtil" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#DecodeDES(System.String,System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="不要多次释放对象" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code" File="DecryptUtil.cs" Line="81">可以在方法 'DecryptUtil.DecodeDES(string, string)' 中多次释放对象 'cStream'。若要避免生成 System.ObjectDisposedException，不应对一个对象多次调用 Dispose。: Lines: 81</Issue>
+             <Issue Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code" File="DecryptUtil.cs" Line="81">可以在方法 'DecryptUtil.DecodeDES(string, string)' 中多次释放对象 'mStream'。若要避免生成 System.ObjectDisposedException，不应对一个对象多次调用 Dispose。: Lines: 81</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#EncodeDES(System.String,System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="不要多次释放对象" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code" File="DecryptUtil.cs" Line="64">可以在方法 'DecryptUtil.EncodeDES(string, string)' 中多次释放对象 'mStream'。若要避免生成 System.ObjectDisposedException，不应对一个对象多次调用 Dispose。: Lines: 64</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="WsLogin" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#Login(System.String,System.String,System.Boolean)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="RethrowToPreserveStackDetails" Category="Microsoft.Usage" CheckId="CA2200" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="f:\ldm\Tony\MesWeb\App_Code" File="WsLogin.cs" Line="96">'WsLogin.Login(string, string, bool)' 再次引发捕获的异常并将其显式地指定为一个参数。请改用不带参数的“throw”以保留该异常最初引发时所在的堆栈位置。</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+      <Namespace Name="MES">
+       <Types>
+        <Type Name="DirFile" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#DownloadFile(System.Web.HttpRequest,System.Web.HttpResponse,System.String,System.Int64)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="不要多次释放对象" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="DirFile.cs" Line="273">可以在方法 'DirFile.DownloadFile(HttpRequest, HttpResponse, string, long)' 中多次释放对象 'myFile'。若要避免生成 System.ObjectDisposedException，不应对一个对象多次调用 Dispose。: Lines: 273</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#ReadFile(System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="RethrowToPreserveStackDetails" Category="Microsoft.Usage" CheckId="CA2200" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="DirFile.cs" Line="77">'DirFile.ReadFile(string)' 再次引发捕获的异常并将其显式地指定为一个参数。请改用不带参数的“throw”以保留该异常最初引发时所在的堆栈位置。</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#SaveFile(System.String,System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="RethrowToPreserveStackDetails" Category="Microsoft.Usage" CheckId="CA2200" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="DirFile.cs" Line="96">'DirFile.SaveFile(string, string)' 再次引发捕获的异常并将其显式地指定为一个参数。请改用不带参数的“throw”以保留该异常最初引发时所在的堆栈位置。</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="ExcelManage" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#GetExcelTables(System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="RethrowToPreserveStackDetails" Category="Microsoft.Usage" CheckId="CA2200" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExcelManage.cs" Line="37">'ExcelManage.GetExcelTables(string)' 再次引发捕获的异常并将其显式地指定为一个参数。请改用不带参数的“throw”以保留该异常最初引发时所在的堆栈位置。</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#InputFromExcel(System.String,System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="RethrowToPreserveStackDetails" Category="Microsoft.Usage" CheckId="CA2200" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExcelManage.cs" Line="468">'ExcelManage.InputFromExcel(string, string)' 再次引发捕获的异常并将其显式地指定为一个参数。请改用不带参数的“throw”以保留该异常最初引发时所在的堆栈位置。</Issue>
+            </Message>
+            <Message TypeName="检查 SQL 查询是否存在安全漏洞" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExcelManage.cs" Line="457">传递给 'ExcelManage.InputFromExcel(string, string)' 中的 'OleDbCommand.OleDbCommand(string, OleDbConnection)' 的查询字符串可能包含以下变量 'TableList[0]', 'TableName'。如果其中的任意变量可能来自用户输入，请考虑使用存储过程或参数化 SQL 查询，而不是通过字符串串联来生成查询。</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#OutputToExcel(System.Data.DataTable,System.Collections.ArrayList,System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="RethrowToPreserveStackDetails" Category="Microsoft.Usage" CheckId="CA2200" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExcelManage.cs" Line="361">'ExcelManage.OutputToExcel(DataTable, ArrayList, string)' 再次引发捕获的异常并将其显式地指定为一个参数。请改用不带参数的“throw”以保留该异常最初引发时所在的堆栈位置。</Issue>
+             <Issue Certainty="95" Level="Error" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExcelManage.cs" Line="423">'ExcelManage.OutputToExcel(DataTable, ArrayList, string)' 再次引发捕获的异常并将其显式地指定为一个参数。请改用不带参数的“throw”以保留该异常最初引发时所在的堆栈位置。</Issue>
+            </Message>
+            <Message TypeName="检查 SQL 查询是否存在安全漏洞" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExcelManage.cs" Line="407">传递给 'ExcelManage.OutputToExcel(DataTable, ArrayList, string)' 中的 'OleDbCommand.CommandText.set(string)' 的查询字符串可能包含以下变量 'Table.TableName', 'Columns[colID]', 'Columns[colID]', 'Columns[colID]', 'Columns[colID]'。如果其中的任意变量可能来自用户输入，请考虑使用存储过程或参数化 SQL 查询，而不是通过字符串串联来生成查询。</Issue>
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExcelManage.cs" Line="353">传递给 'ExcelManage.OutputToExcel(DataTable, ArrayList, string)' 中的 'OleDbCommand.CommandText.set(string)' 的查询字符串可能包含以下变量 'Table.TableName', 'col.Caption', 'col.Caption', 'col.Caption', 'col.Caption'。如果其中的任意变量可能来自用户输入，请考虑使用存储过程或参数化 SQL 查询，而不是通过字符串串联来生成查询。</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#OutputToExcel(System.Data.DataTable,System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="RethrowToPreserveStackDetails" Category="Microsoft.Usage" CheckId="CA2200" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExcelManage.cs" Line="177">'ExcelManage.OutputToExcel(DataTable, string)' 再次引发捕获的异常并将其显式地指定为一个参数。请改用不带参数的“throw”以保留该异常最初引发时所在的堆栈位置。</Issue>
+             <Issue Certainty="95" Level="Error" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExcelManage.cs" Line="236">'ExcelManage.OutputToExcel(DataTable, string)' 再次引发捕获的异常并将其显式地指定为一个参数。请改用不带参数的“throw”以保留该异常最初引发时所在的堆栈位置。</Issue>
+            </Message>
+            <Message TypeName="检查 SQL 查询是否存在安全漏洞" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExcelManage.cs" Line="220">传递给 'ExcelManage.OutputToExcel(DataTable, string)' 中的 'OleDbCommand.CommandText.set(string)' 的查询字符串可能包含以下变量 'Table.TableName', 'Table.Columns[colID].ColumnName', 'Table.Columns[colID].ColumnName', 'Table.Columns[colID].ColumnName', 'Table.Columns[colID].ColumnName'。如果其中的任意变量可能来自用户输入，请考虑使用存储过程或参数化 SQL 查询，而不是通过字符串串联来生成查询。</Issue>
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExcelManage.cs" Line="169">传递给 'ExcelManage.OutputToExcel(DataTable, string)' 中的 'OleDbCommand.CommandText.set(string)' 的查询字符串可能包含以下变量 'Table.TableName', 'col.ColumnName', 'col.ColumnName', 'col.ColumnName', 'col.ColumnName'。如果其中的任意变量可能来自用户输入，请考虑使用存储过程或参数化 SQL 查询，而不是通过字符串串联来生成查询。</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="ExecuteSqlBlock" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#Go(System.String,System.String,System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="不要多次释放对象" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExecuteSqlBlock.cs" Line="72">可以在方法 'ExecuteSqlBlock.Go(string, string, string)' 中多次释放对象 '_reader'。若要避免生成 System.ObjectDisposedException，不应对一个对象多次调用 Dispose。: Lines: 72</Issue>
+             <Issue Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExecuteSqlBlock.cs" Line="72">可以在方法 'ExecuteSqlBlock.Go(string, string, string)' 中多次释放对象 'stream'。若要避免生成 System.ObjectDisposedException，不应对一个对象多次调用 Dispose。: Lines: 72, 73, 74</Issue>
+            </Message>
+            <Message TypeName="检查 SQL 查询是否存在安全漏洞" Category="Microsoft.Security" CheckId="CA2100" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExecuteSqlBlock.cs" Line="40">传递给 'ExecuteSqlBlock.Go(string, string, string)' 中的 'OleDbCommand.CommandText.set(string)' 的查询字符串可能包含以下变量 'ExecuteSqlBlock.ReadNextStatementFromStream(_reader)'。如果其中的任意变量可能来自用户输入，请考虑使用存储过程或参数化 SQL 查询，而不是通过字符串串联来生成查询。</Issue>
+             <Issue Name="WithNonLiterals" Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ExecuteSqlBlock.cs" Line="57">传递给 'ExecuteSqlBlock.Go(string, string, string)' 中的 'SqlCommand.CommandText.set(string)' 的查询字符串可能包含以下变量 'ExecuteSqlBlock.ReadNextStatementFromStream(_reader)'。如果其中的任意变量可能来自用户输入，请考虑使用存储过程或参数化 SQL 查询，而不是通过字符串串联来生成查询。</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="ffmpegHelp" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#CatchImg(System.String,System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="不要多次释放对象" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ffmpegHelp.cs" Line="76">可以在方法 'ffmpegHelp.CatchImg(string, string)' 中多次释放对象 'p'。若要避免生成 System.ObjectDisposedException，不应对一个对象多次调用 Dispose。: Lines: 76</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Convert2Flv(System.String,System.String,System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="不要多次释放对象" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ffmpegHelp.cs" Line="42">可以在方法 'ffmpegHelp.Convert2Flv(string, string, string)' 中多次释放对象 'p'。若要避免生成 System.ObjectDisposedException，不应对一个对象多次调用 Dispose。: Lines: 42</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="FileProcessor" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Messages>
+          <Message TypeName="ImplementIDisposableCorrectly" Category="Microsoft.Design" CheckId="CA1063" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="Breaking">
+           <Issue Name="ProvideDisposeBool" Certainty="95" Level="Error">对 'FileProcessor' 提供 Dispose(bool) 的可重写实现或将该类型标记为密封。对 Dispose(false) 的调用应仅清理本机资源。对 Dispose(true) 的调用应既清理托管资源又清理本机资源。</Issue>
+          </Message>
+         </Messages>
+         <Members>
+          <Member Name="#Dispose()" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="_fileStream" TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="NonBreaking">
+             <Issue Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="FilepPocessor.cs" Line="556">'FileProcessor' 包含 IDisposable 类型的字段 'FileProcessor._fileStream': 'FileStream'。请更改 'FileProcessor' 的 Dispose 方法，使其针对该字段调用 Dispose 或 Close。</Issue>
+            </Message>
+            <Message TypeName="ImplementIDisposableCorrectly" Category="Microsoft.Design" CheckId="CA1063" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="Breaking">
+             <Issue Name="DisposeImplementation" Certainty="95" Level="Error" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="FilepPocessor.cs" Line="556">修改 'FileProcessor.Dispose()'，使它先调用 Dispose(true)，然后对当前对象实例(在 Visual Basic 中为“this”或“Me”)调用 GC.SuppressFinalize，最后返回。</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="FileValidation" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#IsAllowedExtension(System.Web.HttpPostedFile,MES.FileExtension[])" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="不要多次释放对象" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="FileValidation.cs" Line="59">可以在方法 'FileValidation.IsAllowedExtension(HttpPostedFile, FileExtension[])' 中多次释放对象 'ms'。若要避免生成 System.ObjectDisposedException，不应对一个对象多次调用 Dispose。: Lines: 59</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="ImageHelp" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#MakeMyThumbPhoto(System.String,System.String,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="RethrowToPreserveStackDetails" Category="Microsoft.Usage" CheckId="CA2200" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ImageHelp.cs" Line="138">'ImageHelp.MakeMyThumbPhoto(string, string, int, int, int, int, int, int)' 再次引发捕获的异常并将其显式地指定为一个参数。请改用不带参数的“throw”以保留该异常最初引发时所在的堆栈位置。</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#MakeThumbPhoto(System.String,System.String,System.Int32,System.Int32,System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="RethrowToPreserveStackDetails" Category="Microsoft.Usage" CheckId="CA2200" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="ImageHelp.cs" Line="81">'ImageHelp.MakeThumbPhoto(string, string, int, int, string)' 再次引发捕获的异常并将其显式地指定为一个参数。请改用不带参数的“throw”以保留该异常最初引发时所在的堆栈位置。</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="QQRoHelp" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#GetData(System.String,System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="不要多次释放对象" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="QQRobotHelp.cs" Line="141">可以在方法 'QQRoHelp.GetData(string, string)' 中多次释放对象 'resultStream'。若要避免生成 System.ObjectDisposedException，不应对一个对象多次调用 Dispose。: Lines: 141</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="SmtpServerHelper" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Messages>
+          <Message TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+           <Issue Name="DependsOnFix" Certainty="95" Level="CriticalError">在 'SmtpServerHelper' 上实现 IDisposable，因为它创建下列 IDisposable 类型的成员: 'TcpClient'。如果以前提供过 'SmtpServerHelper'，对于现有使用者来说，向此类型添加用于实现 IDisposable 的新成员属于重大更改。</Issue>
+          </Message>
+         </Messages>
+        </Type>
+        <Type Name="XmlCOM" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#ReadXml(System.String)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="不要多次释放对象" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="DependsOnFix">
+             <Issue Certainty="75" Level="Warning" Path="f:\ldm\Tony\MesWeb\App_Code\Common" File="XmlCOM.cs" Line="26">可以在方法 'XmlCOM.ReadXml(string)' 中多次释放对象 'fs'。若要避免生成 System.ObjectDisposedException，不应对一个对象多次调用 Dispose。: Lines: 26</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+  <Target Name="C:\Users\Demin.Liu\AppData\Local\Temp\tmpEFCA.tmp.cadir\bin\App_Web_55cuano5.dll">
+   <Modules>
+    <Module Name="app_web_55cuano5.dll">
+     <Namespaces>
+      <Namespace Name="">
+       <Types>
+        <Type Name="UploadHandler" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#ProcessRequest(System.Web.HttpContext)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="RethrowToPreserveStackDetails" Category="Microsoft.Usage" CheckId="CA2200" Status="Active" Created="2018-08-27 02:57:27Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="f:\ldm\Tony\MesWeb\services" File="UploadHandler.ashx" Line="44">'UploadHandler.ProcessRequest(HttpContext)' 再次引发捕获的异常并将其显式地指定为一个参数。请改用不带参数的“throw”以保留该异常最初引发时所在的堆栈位置。</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+ </Targets>
+ <Rules>
+  <Rule TypeName="DisposableFieldsShouldBeDisposed" Category="Microsoft.Usage" CheckId="CA2213">
+   <Name>应释放可释放的字段</Name>
+   <Description>如果实现了 IDisposable 的类型拥有同样实现 IDisposable 的字段，则封装类型的 Dispose() 实现应对每个可释放字段调用 Dispose()。</Description>
+   <Resolution Name="Default">{0} 包含 IDisposable 类型的字段 {1}: {2}。请更改 {0} 的 Dispose 方法，使其针对该字段调用 Dispose 或 Close。</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182328.aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="75">Warning</MessageLevel>
+   <File Name="usagerules.dll" Version="14.0.0.0" />
+  </Rule>
+  <Rule TypeName="ImplementIDisposableCorrectly" Category="Microsoft.Design" CheckId="CA1063">
+   <Name>正确实现 IDisposable</Name>
+   <Description>所有 IDisposable 类型都应正确实现 Dispose 模式。</Description>
+   <Resolution Name="DisposeImplementation">修改 {0}，使它先调用 Dispose(true)，然后对当前对象实例(在 Visual Basic 中为“this”或“Me”)调用 GC.SuppressFinalize，最后返回。</Resolution>
+   <Resolution Name="ProvideDisposeBool">对 {0} 提供 Dispose(bool) 的可重写实现或将该类型标记为密封。对 Dispose(false) 的调用应仅清理本机资源。对 Dispose(true) 的调用应既清理托管资源又清理本机资源。</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms244737.aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Error</MessageLevel>
+   <File Name="designrules.dll" Version="14.0.0.0" />
+  </Rule>
+  <Rule TypeName="RethrowToPreserveStackDetails" Category="Microsoft.Usage" CheckId="CA2200">
+   <Name>再次引发以保留堆栈详细信息</Name>
+   <Description>重复引发捕获的异常时，请使用 IL 再次引发指令保留原始堆栈详细信息。</Description>
+   <Resolution Name="Default">{0} 再次引发捕获的异常并将其显式地指定为一个参数。请改用不带参数的“throw”以保留该异常最初引发时所在的堆栈位置。</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182363.aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Error</MessageLevel>
+   <File Name="usagerules.dll" Version="14.0.0.0" />
+  </Rule>
+  <Rule TypeName="TypesThatOwnDisposableFieldsShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1001">
+   <Name>具有可释放字段的类型应该是可释放的</Name>
+   <Description>声明可释放成员的类型也应实现 IDisposable。如果该类型没有任何非托管资源，请不要在其上实现终结器。</Description>
+   <Resolution Name="DependsOnFix">在 {0} 上实现 IDisposable，因为它创建下列 IDisposable 类型的成员: {1}。如果以前提供过 {0}，对于现有使用者来说，向此类型添加用于实现 IDisposable 的新成员属于重大更改。</Resolution>
+   <Owner />
+   <Url>http://msdn.microsoft.com/library/ms182172.aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">CriticalError</MessageLevel>
+   <File Name="designrules.dll" Version="14.0.0.0" />
+  </Rule>
+  <Rule TypeName="不要多次释放对象" Category="Microsoft.Usage" CheckId="CA2202">
+   <Name>不要多次释放对象</Name>
+   <Description>可以多次调用正确实现的 Dispose 方法，而不会引发异常。但是，并不保证所有情况下都会如此。若要避免生成 System.ObjectDisposedException，您不应对一个对象多次调用 Dispose。</Description>
+   <Resolution Name="Default">可以在方法 {1} 中多次释放对象 {0}。若要避免生成 System.ObjectDisposedException，不应对一个对象多次调用 Dispose。: Lines: 76</Resolution>
+   <Owner>RuleOwner</Owner>
+   <Url>http://msdn.microsoft.com/library/ms182334.aspx</Url>
+   <Email />
+   <MessageLevel Certainty="75">Warning</MessageLevel>
+   <File Name="dataflowrules.dll" Version="14.0.0.0" />
+  </Rule>
+  <Rule TypeName="检查 SQL 查询是否存在安全漏洞" Category="Microsoft.Security" CheckId="CA2100">
+   <Name>检查 SQL 查询是否存在安全漏洞</Name>
+   <Description>通过用户输入生成的 SQL 命令字符串容易受到 SQL 注入式攻击。Microsoft SQL Server 和其他数据库服务器支持存储过程和参数化 SQL 查询，这将降低受到注入式攻击的风险。</Description>
+   <Resolution Name="WithNonLiterals">传递给 {1} 中的 {0} 的查询字符串可能包含以下变量 {2}。如果其中的任意变量可能来自用户输入，请考虑使用存储过程或参数化 SQL 查询，而不是通过字符串串联来生成查询。</Resolution>
+   <Owner>RuleOwner</Owner>
+   <Url>http://msdn.microsoft.com/library/ms182310.aspx</Url>
+   <Email />
+   <MessageLevel Certainty="75">Warning</MessageLevel>
+   <File Name="dataflowrules.dll" Version="14.0.0.0" />
+  </Rule>
+ </Rules>
+ <Localized>
+  <String Key="Category">类别</String>
+  <String Key="Certainty">确定性</String>
+  <String Key="CollapseAll">全部折叠</String>
+  <String Key="CheckId">检查 ID</String>
+  <String Key="Error">错误</String>
+  <String Key="Errors">错误</String>
+  <String Key="ExpandAll">全部展开</String>
+  <String Key="Help">帮助</String>
+  <String Key="Line">行</String>
+  <String Key="Messages">消息</String>
+  <String Key="LocationNotStoredInPdb">[位置未存储在 Pdb 中]</String>
+  <String Key="Project">项目</String>
+  <String Key="Resolution">解析</String>
+  <String Key="Rule">规则</String>
+  <String Key="RuleFile">规则文件</String>
+  <String Key="RuleDescription">规则说明</String>
+  <String Key="Source">源</String>
+  <String Key="Status">状态</String>
+  <String Key="Target">目标</String>
+  <String Key="Warning">警告</String>
+  <String Key="Warnings">警告</String>
+  <String Key="ReportTitle">代码分析报告</String>
+ </Localized>
+</FxCopReport>

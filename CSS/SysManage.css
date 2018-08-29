@@ -1,0 +1,4 @@
+﻿body { margin:0 auto;padding:0;
+}
+.col-xs-6,.col-xs-5{border:1px solid #808080;}
+.col-xs-6 tab-pane{border:1px solid #808080;border-top:0;}

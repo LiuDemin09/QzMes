@@ -1,0 +1,113 @@
+﻿body{
+	margin:0;
+	padding:0;
+	font-size:9pt;
+	height:100%;
+	background-color: #FFFAF0;
+	background-image: url(../images/login/bg.jpg);
+	background-repeat: repeat;
+	font-family:arial,"Hiragino Sans GB","Microsoft YaHei","微軟正黑體","儷黑 Pro",sans-serif;
+}
+#center{
+	z-index:1;
+	position: relative;
+	border: 1px red;
+	visibility: visible;
+	width: 75%;
+	height: auto;
+	margin-top: 10%;
+	margin-left:25%;
+}
+
+#center_left{
+	width:164px;
+	height:auto;
+	margin-top:20px;
+/* 	max-width:280px; */
+	position:relative;
+}
+
+#center_left .logo{
+	margin-bottom:15px;
+	text-align: right;
+}
+
+#center_left .welcome{
+	width:164px;
+	height:64px;
+	background: url(../images/login/welcome.png) no-repeat;
+/* 	position:absolute; 
+	right:0; */
+	margin-top:20px;
+}
+
+#center_middle{
+	min-height:300px;MARGIN-RIGHT: auto; MARGIN-LEFT: auto;position:relative;
+}
+#login_m{
+	height:260px;
+	
+}
+#center_horn{
+	width:110px;
+	height:100%;
+}
+#horn{
+	margin-top:86px;
+	width:110px;
+	height:229px;
+	/* float:left; */
+	background:url(../images/login/horn.png) no-repeat;
+}
+#formDiv {
+	/* float:left; */
+	MARGIN-RIGHT: 0; MARGIN-LEFT: 0;
+	height:260px;
+	/* background-color:#F1F4F8; */
+	background: url(../images/login/blue_bg.jpg) repeat;
+	/*border-radius:20px;
+	border:solid 5px  #FFFFFF;*/
+	margin-top:10px;
+	position:relative;
+}
+#formDiv_title{
+	width:140px;height:29px;margin-left:10px;
+	line-height:29px;
+	color:#E5E5E3;font-size:16px;
+}
+#formDiv_content{
+	padding-top:15px;
+	width:376px;
+	height:158px;
+	background:url(../images/login/content_bg.png) no-repeat;
+}
+#logoIcon{
+	position:absolute; 
+	right:0;
+	bottom:0;
+	width:263px;
+	height:90px;
+	display:inline-block;
+	background:url(../images/login/logo_y.png) no-repeat;
+}
+#copyright{
+	height:28px;
+	line-height: 28px;
+	font-size:12px;
+	color:#565656;
+}
+/*登录按钮*/
+#btn{margin-left:20px;height:30px; margin-right:28px; text-align:center;}
+/*#btn a{line-height:40px; background: url(../images/login/tu4.png); width:400px; float:left; text-decoration:none; color:#000;}*/
+#btn a{line-height:30px;background-color:#4D4B4B; width:160px; float:left; text-decoration:none; color:#FFF; font-size:16px; border-radius:6px;border:solid 1px #939393;}
+
+/*用户名密码*/
+#user{border:solid 1px #888888; margin-left:20px;width:260px;height:35px;background:#E7E7E7;}
+#user input{ border:none;background:url(../images/login/tu2.png) no-repeat 5px center;height:35px;line-height:35px;width:100%; text-indent:32px;}
+   
+#pword{border:solid 1px #888888;margin-left:20px;margin-top:10px;width:260px;height:35px;background:#E7E7E7;}
+#pword input{border:none;background:url(../images/login/tu3.png) no-repeat 5px center;height:35px;line-height:35px;width:100%; text-indent:32px;}
+input{font:14px bolder;color:#91A5C2;}
+#homeImage{
+	
+}

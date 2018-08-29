@@ -1,0 +1,3138 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Services;
+using System.Web.Script.Services;
+using Freeworks.Common;
+using BLL;
+using DAL;
+using System.Text;
+using System.Net;
+using System.Net.Http;
+using System.Collections;
+/// <summary>
+/// WsSystem 的摘要说明
+/// </summary>
+[WebService(Namespace = "http://tempuri.org/")]
+[WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
+// 若要允许使用 ASP.NET AJAX 从脚本中调用此 Web 服务，请取消注释以下行。 
+ [System.Web.Script.Services.ScriptService]
+public class WsSystem : WsBase
+{
+    private SystemBO _bal;
+    public WsSystem() : base()
+    {
+
+        //Uncomment the following line if using designed components 
+        //InitializeComponent(); 
+        _bal = BLLFactory.GetBal<SystemBO>(_userInfo);
+    }
+
+    [WebMethod]
+    public string HelloWorld()
+    {
+        return "Hello World";
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveBaseInfo(BasBase bbase)
+    {
+        _bal.SaveBaseInfo(bbase);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    //public HttpResponseMessage GetUserMenu()
+    public ArrayList GetUserMenu()
+    {
+       // string sres =  "{'menus':[";
+          
+        IList<SysMenu> lmenu = _bal.GetMenus();
+        ArrayList alist = new ArrayList();
+        foreach(SysMenu sm in lmenu)
+        {
+            string sreshead = string.Empty;
+            IList<SysMenu> lsubmenu = _bal.GetSubMenus(sm.CODE);
+            if(lsubmenu.Count>0)
+            {
+                ShowMenu smenu = new ShowMenu();
+                smenu.menuid = sm.CODE;
+                smenu.icon = "icon-sys";
+                smenu.menuname = sm.Name;
+               // sreshead = "{'menuid':'" + sm.CODE + "','icon':'icon-sys','menuname':'" + sm.Name + "','menus':[";
+                string srescontent = string.Empty;
+                foreach (SysMenu ssm in lsubmenu)
+                {
+                    ShowSubMenu ssmenu = new ShowSubMenu();
+                    ssmenu.menuname = ssm.Name;
+                    ssmenu.icon = "icon-nav";
+                    ssmenu.url = ssm.PageUrl;
+                    smenu.menus.Add(ssmenu);
+                    //if (string.IsNullOrEmpty(srescontent))
+                    //{
+                    //    srescontent = "{'menuname':'" + ssm.Name + "','icon':'icon-nav','url':'" + ssm.PageUrl + "'}";
+                    //}
+                    //else
+                    //{
+                    //    srescontent += ",{'menuname':'" + ssm.Name + "','icon':'icon-nav','url':'" + ssm.PageUrl + "'}";
+                    //}
+                }
+                // sres += sreshead + srescontent + "]}";
+                alist.Add(smenu);
+            }
+        }
+        // sres += "]";
+        // sres += "]}";
+
+        //HttpResponseMessage result = new HttpResponseMessage { Content = new StringContent(sres, Encoding.GetEncoding("UTF-8"), "application/json") };
+        
+        return alist;
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveUser(SysUser user)
+    {
+        _bal.SaveUser(user);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemoveUser(string userCode)
+    {
+        _bal.RemoveUser(userCode);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void UpdateUserRole(string[] items, string userCode)
+    {
+        _bal.UpdateUserRole(items, userCode);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string TreeRoleUser(string userCode)
+    {
+        IList<SysRole> objs = _bal.ListRole();
+        StringBuilder xml = new StringBuilder("<?xml version='1.0' encoding='utf-8'?>");
+        xml.Append("<tree id='0'>");
+        foreach (SysRole o in objs)
+        {
+            xml.Append(string.Format("<item text='[{0}]:{1}' id='{2}' {3} > ", o.RoleName, o.MEMO, o.ID, _bal.ExistRoleUser(userCode, o.ID) ? "checked='1'" : ""));
+
+            xml.Append("</item>");
+        }
+        xml.Append("</tree>");
+        return xml.ToString();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string FindUsers(string userCode, string userName)
+    {
+        IList<SysUser> objs = _bal.FindUsers(userCode, userName);
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        foreach (SysUser o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.UserCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UserCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UserName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.DeptName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate));
+            //sb.Append(string.Format("<cell>View^javascript:MySite.Runner.showDetail({0})^_self</cell>", log.ID));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string FindPublicUsers(string userCode, string userName)
+    {
+        IList<SysUser> objs = _bal.FindPublicUsers(userCode, userName);
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        foreach (SysUser o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.UserCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UserCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UserName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.DeptName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MOBILE));
+            //sb.Append(string.Format("<cell>View^javascript:MySite.Runner.showDetail({0})^_self</cell>", log.ID));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public SysUser FindUserByCode(string userCode)
+    {
+        return _bal.FindUserByCode(userCode);
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public SysUser FindPublicUserByCode(string userCode)
+    {
+        IList < SysUser > objs =_bal.FindPublicUserByCode(userCode);
+        if(objs.Count>0)
+        {
+            return objs[0];
+        }
+        else
+        {
+            return null;
+        }
+          
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string ListRole()
+    {
+        IList<SysRole> objs = _bal.ListRole();
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        foreach (SysRole o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.RoleName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.STATUS));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate));
+            //sb.Append(string.Format("<cell>View^javascript:MySite.Runner.showDetail({0})^_self</cell>", log.ID));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public IList<SysUser> ListUsersByRole(string roleId)
+    {
+        return _bal.ListUsersByRole(roleId);
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveRole(SysRole role)
+    {
+        _bal.SaveRole(role);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemoveRole(string id)
+    {
+        _bal.RemoveRole(id);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void UpdateRoleUsers(string roleId, string[] userCode)
+    {
+        _bal.UpdateRoleUsers(roleId, userCode);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public SysMenu FindMenuByCode(string code)
+    {
+        return _bal.FindMenuByCode(code);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListParentMenu()
+    {
+        return _bal.ListParentMenu();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemoveMenu(string code)
+    {
+        _bal.RemoveMenu(code);
+    }
+
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveMenu(SysMenu menuInfo)
+    {
+        _bal.SaveMenu(menuInfo);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string GetAllMenuTree()
+    {
+        IList<SysMenu> menus = _bal.LoadMenuAll();
+
+        var m1 = menus.Where(c => c.LevelNo == 1).OrderBy(p => p.CODE).ToArray();
+        //StringBuilder xml = new StringBuilder("<?xml version='1.0' encoding='utf-8'?>");
+        StringBuilder xml = new StringBuilder();
+        xml.Append("<tree id='0'>");
+        foreach (SysMenu m in m1)
+        {
+            if (menus.Count(c => c.ParentCode == m.CODE) > 0)
+            {
+                xml.Append(string.Format("<item text='[{1}]{0}' id='{1}' >", m.Name, m.CODE));
+            }
+            else
+            {
+                xml.Append(string.Format("<item text='[{1}]{0}' id='{1}'>", m.Name, m.CODE));
+            }
+            var m2 = menus.Where(c => c.ParentCode == m.CODE).OrderBy(p => p.CODE).ToArray();
+            foreach (SysMenu sm in m2)
+            {
+                xml.Append(string.Format("<item text='[{1}]{0}' id='{1}'>", sm.Name, sm.CODE));
+
+                xml.Append("</item>");
+            }
+
+            xml.Append("</item>");
+        }
+        xml.Append("</tree>");
+
+        return xml.ToString();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string GetAllMenuChkBoxTree(string roleId)
+    {
+        IList<SysMenu> menus = _bal.ListAuthorizabledMenus();
+
+        var m1 = menus.Where(c => c.LevelNo == 1).OrderBy(p => p.CODE).ToArray();
+        StringBuilder xml = new StringBuilder("<?xml version='1.0' encoding='utf-8'?>");
+        xml.Append("<tree id='0'>");
+        foreach (SysMenu m in m1)
+        {
+            if (menus.Count(c => c.ParentCode == m.CODE) > 0)
+            {
+                xml.Append(string.Format("<item text='{0}' id='+{1}' {2} >", m.Name, m.CODE, _bal.ExistRoleMenu(roleId, m.CODE) ? "nocheckbox='1'" : "nocheckbox='1'"));
+            }
+            else
+            {
+                xml.Append(string.Format("<item text='{0}' id='+{1}' {2} >", m.Name, m.CODE, _bal.ExistRoleMenu(roleId, m.CODE) ? "nocheckbox='1'" : "nocheckbox='1'"));
+            }
+
+            var m2 = _bal.ListAuthorizabledSubFuncs(m.CODE);
+            foreach (SysMenu sm in m2)
+            {
+                //var ps = _bal.ListPermByMenu(sm.CODE);
+                //if (ps.Count > 0)
+                //{
+                //    xml.Append(string.Format("<item text='{0}' id='+{1}' {2} open='1'>", sm.Name, sm.CODE, _bal.ExistRoleMenu(roleId, sm.CODE) ? "checked='1'" : ""));
+                //}
+                //else
+                //{
+                    xml.Append(string.Format("<item text='{0}' id='+{1}' {2} >", sm.Name, sm.CODE, _bal.ExistRoleMenu(roleId, sm.CODE) ? "checked='1'" : ""));
+                //}
+                //foreach (SysPermission p in ps)
+                //{
+                //    xml.Append(string.Format("<item text='{0}[{4}]' id='{1}+{2}' {3}  tooltip='{4}'> ", p.PermName, sm.CODE, p.ID, _bal.ExistRolePerm(roleId, sm.CODE, p.ID) ? "checked='1'" : "", p.MEMO));
+
+                //    xml.Append("</item>");
+                //}
+                xml.Append("</item>");
+            }
+
+            xml.Append("</item>");
+        }
+        xml.Append("</tree>");
+
+        return xml.ToString();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void UpdateRolePerm(string[] items, string roleId)
+    {
+        _bal.UpdateRolePerm(items, roleId);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void UpdatePassword(String oldPassword, String newPassword)
+    {
+        _bal.UpdatePassword(oldPassword, newPassword);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string GetBasBaseCode()
+    {
+        string res = "QZ" + "B";
+        string strYear = DateTime.Today.Year.ToString();
+        res += strYear.Substring(2);
+        string strMonth = DateTime.Today.Month.ToString().PadLeft(2, '0');
+        res += strMonth;
+        string seq = PubHelper.GetHelper().GetNextID("SEQ_BASINFO_NO").ToString().PadLeft(4, '0');
+        res += seq;
+        return res;
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemoveBaseInfo(string Code)
+    {
+        _bal.RemoveBaseInfo(Code);
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string ListBaseInfo()
+    {
+        IList<BasBase> objs = _bal.FindBaseInfo("", "");
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        foreach (BasBase o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CODE));
+            sb.Append(string.Format("<cell>{0}</cell>", o.NAME));
+            sb.Append(string.Format("<cell>{0}</cell>", o.SubCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.SubName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            //sb.Append(string.Format("<cell>View^javascript:MySite.Runner.showDetail({0})^_self</cell>", log.ID));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryBaseInfo(string code, string name)
+    {
+        IList<BasBase> objs = _bal.FindBaseInfo(code, name);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        foreach (BasBase o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CODE));
+            sb.Append(string.Format("<cell>{0}</cell>", o.NAME));
+            sb.Append(string.Format("<cell>{0}</cell>", o.SubCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.SubName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            //sb.Append(string.Format("<cell>View^javascript:MySite.Runner.showDetail({0})^_self</cell>", log.ID));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveSequence(BasSequence bseq)
+    {
+        _bal.SaveBasSequence(bseq);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemoveSequence(string ID)
+    {
+        _bal.RemoveBasSequence(ID);
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string ListBasSequence(string name)
+    {
+        IList<BasSequence> objs = _bal.FindBasSequence(name);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strtype = string.Empty;
+        string strmode = string.Empty;
+        foreach (BasSequence o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.SeqName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.FAMILY));
+            sb.Append(string.Format("<cell>{0}</cell>", o.DigitalLen));            
+            sb.Append(string.Format("<cell>{0}</cell>",o.DigitalTypeMemo));           
+            sb.Append(string.Format("<cell>{0}</cell>", o.IncreaseModeMemo));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append(string.Format("<cell>{0}</cell>", o.DigitalType));
+            sb.Append(string.Format("<cell>{0}</cell>", o.IncreaseMode));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveBasCode(BasCode bcode)
+    {
+        _bal.SaveBasCode(bcode);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemoveBasCode(string ID)
+    {
+        _bal.RemoveBasCode(ID);
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string LisBasCode(string name)
+    {
+        IList<BasCode> objs = _bal.FindBasCode("", name);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+
+        foreach (BasCode o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.NAME));
+            sb.Append(string.Format("<cell>{0}</cell>", o.TYPE));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PREFIX));
+            sb.Append(string.Format("<cell>{0}</cell>", o.DateFormat));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BindSequence));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CodeLen));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindSeqNo()
+    {
+        return _bal.ListBindSeqNo();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindCustName()
+    {
+        return _bal.ListBindCustName();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveOrderInfo(OrderDetail obj)
+    {
+        _bal.SaveOrderInfo(obj);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string GetOrderNoCode()
+    {
+        string res = "QZ" + "O";
+        string strYear = DateTime.Today.Year.ToString();
+        res += strYear.Substring(2);
+        string strMonth = DateTime.Today.Month.ToString().PadLeft(2, '0');
+        res += strMonth;
+        string seq = PubHelper.GetHelper().GetNextID("SEQ_ORDER_NO").ToString().PadLeft(4, '0');
+        res += seq;
+        return res;
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemoveOrderInfo(string ID)
+    {
+        _bal.RemoveOrderInfo(ID);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryOrderInfo(string orderno, string parsdrawingno)
+    {
+        IList<OrderDetail> objs = _bal.FindOrderInfo(orderno, parsdrawingno);
+        
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+
+        foreach (OrderDetail o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderNo));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CustName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CONTRACT));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OutDate));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string QueryProductNameByOrder(string orderno)
+    {
+        IList<OrderDetail> objs = _bal.FindOrderInfo(orderno, "");
+        if(objs!=null)
+        {
+            return objs[0].ProductName+"^"+objs[0].ProductCode+"^"+objs[0].CustName;
+        }
+        
+        return "";
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryOrderStatusInfo(string orderno, string parsdrawingno)
+    {
+        IList<OrderDetail> objs = _bal.FindOrderInfo(orderno, parsdrawingno);
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (OrderDetail o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderNo));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+           
+            switch(o.STATUS)
+            {
+                case "0":
+                    strstatus = "创建";
+                    break;
+                case "1":
+                    strstatus = "发布";
+                    break;
+                case "2":
+                    strstatus = "发货通知";
+                    break;
+                case "3":
+                    strstatus = "关闭";
+                    break;
+                default:
+                    strstatus = "状态异常";
+                    break;
+            }
+            sb.Append(string.Format("<cell>{0}</cell>", strstatus));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CustName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OutDate));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    /// <summary>
+    /// 得到单据编号
+    /// </summary>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string GetInlistNO()
+    {
+        string res = "QZ" + "D";
+        string strYear = DateTime.Today.Year.ToString();
+        res += strYear.Substring(2);
+        //string strMonth = DateTime.Today.Month.ToString().PadLeft(2, '0');
+        //res += strMonth;
+        string seq = PubHelper.GetHelper().GetNextID("SEQ_INLIST_NO").ToString().PadLeft(6, '0');
+        res += seq;
+        return res;
+    }
+    /// <summary>
+    /// 得到来料条码
+    /// </summary>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string GetMSN()
+    {
+        string res = "QZ" + "M";
+        string strYear = DateTime.Today.Year.ToString();
+        res += strYear.Substring(2);
+        string strMonth = DateTime.Today.Month.ToString().PadLeft(2, '0');
+        res += strMonth;
+        string strDay = DateTime.Today.Day.ToString().PadLeft(2, '0');
+        res += strDay;
+        string seq = PubHelper.GetHelper().GetNextID("SEQ_MSN_NO").ToString().PadLeft(4, '0');
+        res += seq;
+        return res;
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string SaveInWareHouseInfo(MaterialStock obj)
+    {
+        int qty =(int) obj.BasQty;
+        string res = string.Empty;
+        for(int i=0;i<qty;i++)
+        {
+            obj.MSN = GetMSN();
+            obj.BasQty = 1;
+            _bal.SaveInWareHouseInfo(obj);
+            if(string.IsNullOrEmpty(res))
+            {
+                res = obj.MSN;
+            }
+            else
+            {
+                res += "," + obj.MSN;
+            }
+        }
+        return res;
+       // _bal.SaveInWareHouseInfo(obj);
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemovInWareHouseInfo(string msn)
+    {
+        _bal.RemoveInWareHouseInfo(msn);
+    }
+    
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindReceiveHouse()
+    {
+        return _bal.ListBindReceiveHouse();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindUnit()
+    {
+        return _bal.ListBindUnit();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryInWareHouseInfo(string msn, string materialno)
+    {
+        IList<MaterialStock> objs = _bal.FindInWareHouseInfo(msn, materialno);
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (MaterialStock o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MaterialCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MaterialName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CustName));
+            IList<BasBase> ibb = _bal.FindBaseBySubCode(o.StockHouse);
+
+            sb.Append(string.Format("<cell>{0}</cell>", ibb[0].SubName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.DOCUMENTID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UNIT));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BasQty));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+   
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindWorkOrder(string status)
+    {
+        return _bal.ListBindWorkOrder(status);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryBackupInfo(string workorder)
+    {
+        IList<MaterialStock> objs = _bal.QueryBackupInfo(workorder);
+        if(objs==null)
+        {
+            return string.Empty;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (MaterialStock o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MaterialCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MaterialName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CustName));
+            IList<BasBase> ibb = _bal.FindBaseBySubCode(o.StockHouse);
+
+            sb.Append(string.Format("<cell>{0}</cell>", ibb[0].SubName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.DOCUMENTID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UNIT));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BasQty));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryBackupWOInfo(string workorder)
+    {
+        WorkOrder wo = new WorkOrder();
+        wo.STATUS = "1";
+        wo.WO = workorder;
+        IList<WorkOrder> wos = _bal.FindWorkOrderInfo(wo);
+        if (wos == null)
+        {
+            return string.Empty;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        foreach (WorkOrder o in wos)
+        {
+            //只显示没有备完料的工单信息
+            if (o.MaterialQty == null || o.MaterialQty != o.PlanQuantity)
+            {
+                sb.Append(string.Format("<row id='{0}'>", o.WO));
+                sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+                sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));//当前是零件图号为物料名称
+                IList<MaterialStock> objs = _bal.QueryBackupInfo(o.WO);
+                if(objs!=null&&objs.Count>0)
+                {
+                    sb.Append(string.Format("<cell>{0}</cell>", objs[0].CustName));
+                    IList<BasBase> ibb = _bal.FindBaseBySubCode(objs[0].StockHouse);
+                    sb.Append(string.Format("<cell>{0}</cell>", ibb[0].SubName));
+                }
+                else
+                {
+                    sb.Append(string.Format("<cell>{0}</cell>", ""));
+                    sb.Append(string.Format("<cell>{0}</cell>",""));
+                }                
+                sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+                sb.Append(string.Format("<cell>{0}</cell>", objs.Count));
+                sb.Append(string.Format("<cell>{0}</cell>", o.MaterialQty));
+                sb.Append("</row>");
+            }
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveOutWareHouseInfo(MaterialStockHistory obj)
+    {
+       _bal.SaveOutWareHouseInfo(obj);        
+    }
+
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveReSendMaterialInfo(MaterialStockHistory obj)
+    {
+        _bal.SaveReSendMaterialInfo(obj);
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveReturnMaterialInfo(string MSN)
+    {
+        _bal.SaveReturnMaterialInfo(MSN);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryOutHistoryInfo(string workorder,string status)
+    {
+        IList<MaterialStockHistory> objs = _bal.QueryOutHistoryInfo(workorder, status);
+        if(objs==null)
+        {
+            return string.Empty;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (MaterialStockHistory o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkOrder));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MaterialCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MaterialName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            IList<BasBase> ibb = _bal.FindBaseBySubCode(o.StockHouse);
+            string strStockHouse = string.Empty;
+            if(ibb!=null)
+            {
+                strStockHouse = ibb[0].SubName;
+            }
+            sb.Append(string.Format("<cell>{0}</cell>", strStockHouse));
+            sb.Append(string.Format("<cell>{0}</cell>", o.DOCUMENTID));
+            SysUser su = _bal.FindUserByCode(o.MaterialHandler);
+            string struser = string.Empty;
+            if(su!=null)
+            {
+                struser = su.UserName;
+            }
+            sb.Append(string.Format("<cell>{0}</cell>", struser));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string SaveLabelReprint(ReprintLog obj)
+    {
+        _bal.SaveLabelReprint(obj);
+        return "OK";
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryReprintLog(string sn)
+    {
+        IList<ReprintLog> objs = _bal.FindReprintLogInfo(sn);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (ReprintLog o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.LabelType));
+            sb.Append(string.Format("<cell>{0}</cell>", o.SN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));             
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));      
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindProductName()
+    {
+        return _bal.ListBindProductName();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string SavePartsDrawing(PartsdrawingCode obj)
+    {
+        _bal.SavePartsDrawing(obj);
+        return "OK";
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemovePartsdrawingNo(string id)
+    {
+        _bal.RemovePartsdrawingNo(id);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryPartsDrawingInfo(string partsdrawingno)
+    {
+        IList<PartsdrawingCode> objs = _bal.FindPartsdrawingInfo(partsdrawingno);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (PartsdrawingCode o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CustName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CustCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QualityCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.AskQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.AskDate));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string QuerybatchQtyByPartsDrawing(string partsdrawingno)
+    {
+        IList<PartsdrawingCode> objs = _bal.FindPartsdrawingInfo(partsdrawingno);
+        if(objs!=null)
+        {
+            return objs[0].BatchNumber + "," + objs[0].PlanQuantity;
+        }
+         
+        return ",";
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string GetWorkOrderCode()
+    {
+        string res = "QZ" + "W";
+        string strYear = DateTime.Today.Year.ToString();
+        res += strYear.Substring(2);
+        string strMonth = DateTime.Today.Month.ToString().PadLeft(2, '0');
+        res += strMonth;
+        string strDay = DateTime.Today.Day.ToString().PadLeft(2, '0');
+        res += strDay;
+        string seq = PubHelper.GetHelper().GetNextID("SEQ_WORKORDER_NO").ToString().PadLeft(4, '0');
+        res += seq;
+        return res;
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string SaveWorkOrderInfo(WorkOrder obj)
+    {
+        obj.STATUS = "0";//状态（0：创建；1：运行；2：暂停；3：关闭；）
+        obj.MEMO = "创建";
+        obj.CreatedDate = DateTime.Now;
+        _bal.SaveWorkOrderInfo(obj);
+        return "OK";
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemoveWorkOrderInfo(string workorder)
+    {
+        _bal.RemoveWorkOrder(workorder);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindOrderNo()
+    {
+        return _bal.ListBindOrderNo();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindMachineType()
+    {
+        return _bal.ListBindMachineType();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindPartsDrawingNo()
+    {
+        return _bal.ListBindPartsDrawingCode();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindPartsDrawingNobyOrder(string order)
+    {
+        return _bal.ListBindPartsDrawingCodebyOrder(order);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    //[ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string QueryWorkOrderInfo(string workorder)
+    {
+        IList<WorkOrder> objs = _bal.FindWorkOrderInfo(workorder);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (WorkOrder o in objs)
+        {
+            if (o.STATUS == "1")
+            {
+                sb.Append(string.Format("<row id='{0}' bgColor='green'>", o.WO));
+            }
+            else if (o.STATUS == "2")
+            {
+                sb.Append(string.Format("<row id='{0}' bgColor='yellow'>", o.WO));
+            }
+
+            else if (o.STATUS == "3")
+            {
+                sb.Append(string.Format("<row id='{0}' bgColor='grey'>", o.WO));
+            }
+            else
+            {
+                sb.Append(string.Format("<row id='{0}' >", o.WO));
+            }
+            //sb.Append(string.Format("<row id='{0}'>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineType));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkerName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StartTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.EndTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CheckTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.InTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] QueryMachinesInfo(string code)
+    {
+        return _bal.ListBindMachines(code);
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindMachineInfo()
+    {
+        TextValueInfo[] t1 = _bal.ListBindMachines("QZB1704000901");//铣床
+        TextValueInfo[] t2 = _bal.ListBindMachines("QZB1704000902");//车床
+        TextValueInfo[] t3 = _bal.ListBindMachines("QZB1704000903");//车铣
+        TextValueInfo[] t = new TextValueInfo[t1.Length + t2.Length + t3.Length];
+        int i = 0;
+        for (i = 0; i < t1.Length; i++)
+        {
+            t[i] = new TextValueInfo();
+            t[i].Value = t1[i].Value;
+            t[i].Text = t1[i].Text;
+        }
+        for (var j=0; j < t2.Length; j++)
+        {
+            t[i] = new TextValueInfo();
+            t[i].Value = t2[j].Value;
+            t[i].Text = t2[j].Text;
+            i++;
+        }
+        for (var k=0; k < t3.Length; k++)
+        {
+            t[i] = new TextValueInfo();
+            t[i].Value = t3[k].Value;
+            t[i].Text = t3[k].Text;
+            i++;
+        }
+        return t;
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void UpdateWorkOrderInfo(string workorder, string status)
+    {
+          _bal.UpdateWorkOrderInfo(workorder, status);
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryWorkOrderAssign(string status,bool isAssign)
+    {
+        IList<WorkOrder> objs = _bal.FindWorkOrderByStatus(status, isAssign);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (WorkOrder o in objs)
+        {
+            if(isAssign)
+            {
+               if(!string.IsNullOrEmpty(o.WORKER))
+                {
+                    sb.Append(string.Format("<row id='{0}'>", o.WO));
+                    sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+                    sb.Append(string.Format("<cell>{0}</cell>", o.OrderNumber));
+                    sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+                    sb.Append(string.Format("<cell>{0}</cell>", o.MachineType));
+                    sb.Append(string.Format("<cell>{0}</cell>", o.MachineName));
+                    sb.Append(string.Format("<cell>{0}</cell>", o.WorkerName));
+                    sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+                    sb.Append(string.Format("<cell>{0}</cell>", o.StartTime));
+                    sb.Append(string.Format("<cell>{0}</cell>", o.EndTime));
+                    sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+                    sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+                    sb.Append(string.Format("<cell>{0}</cell>", o.CheckTime));
+                    sb.Append(string.Format("<cell>{0}</cell>", o.InTime));
+                    sb.Append("</row>");
+                    continue;
+                }
+            }
+            sb.Append(string.Format("<row id='{0}'>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineType));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkerName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StartTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.EndTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CheckTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.InTime));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindUserByOperators()
+    {
+        return _bal.ListBindUserByOperators();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string SaveWorkOrderAssign(string workorder, string operater, string operatercode)
+    {
+        _bal.SaveWorkOrderAssign(workorder, operater, operatercode);
+        return "OK";
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string GetPSNByMSN(string MSN)
+    {
+       string psn = _bal.GetPSNByMSN(MSN);
+        return psn;
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryPSN(string psn)
+    {
+        IList<TrackingWip> objs = _bal.FindPSNPrint(psn);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        foreach (TrackingWip o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.PSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkOrder));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));           
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// 查询生产任务，根据作业员工号查询
+    /// </summary>
+    /// <param name="worker"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryLatheTask(string worker)
+    {
+        IList<WorkOrder> objs = _bal.FindLatheTask(worker);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (WorkOrder o in objs)
+        {            
+            sb.Append(string.Format("<row id='{0}'>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineType));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkerName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StartTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.EndTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.CheckTime));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.InTime));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    /// <summary>
+    /// 查询生产记录，根据作业员工号查询
+    /// </summary>
+    /// <param name="worker"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryLatheTaskHistory(string worker)
+    {
+        IList<TrackingHistory> objs = _bal.FindLatheTaskHistory(worker);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (TrackingHistory o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkOrder));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StationName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CreatedDate));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.CheckTime));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.InTime));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    /// <summary>
+    /// 处理车铣报工的扫描数据
+    /// </summary>
+    /// <param name="inputdata"></param>
+    /// <param name="ID"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string DealwithScanData(string inputdata ,string ID)
+    {
+        TrackingTemp tt = null;
+        string strID = string.Empty;
+        if (!string.IsNullOrEmpty(ID))
+        {
+             tt = _bal.FindTrackingTemp(ID);
+        }
+        switch(inputdata)
+        {
+            //case "snquery":
+            //    Server.Transfer("..//Pages//ProductionManage//SNTracking.aspx");
+            //    break;
+            case "cancel":
+                _bal.RemoveTrackingTemp(ID);
+                break;
+            case "fail":
+                if(tt.Step!="psn")
+                {
+                    throw new Exception("请先扫描产品条码！"); 
+                }
+                tt.STATUS = "F";
+                tt.Step = "fail";
+                _bal.SaveTrackingTemp(tt);
+                break;
+            case "pass":
+                if (tt.Step != "psn")
+                {
+                    throw new Exception("请先扫描产品条码！");
+                }
+                tt.STATUS = "P";
+                tt.Step = "pass";
+                _bal.SaveTrackingTemp(tt);
+                break;
+            case "start":
+                tt.CreatedDate = DateTime.Now;
+                tt.Step = "start";
+                _bal.SaveTrackingTemp(tt);
+                break;
+            case "finish":
+                if (tt.Step != "pass"&tt.Step!="fail")
+                {
+                    throw new Exception("请先扫描合格或不合格！");
+                }
+                tt.UpdatedDate = DateTime.Now;
+                tt.TaskTime = (tt.UpdatedDate - tt.CreatedDate).ToString();
+                IList<TrackingWip> tw = _bal.FindTrackingWip(tt.PSN);
+                if(tw.Count>0)
+                {
+                    tw[0].StationName = "CHEXI";
+                    tw[0].STATUS = tt.STATUS;
+                    tw[0].InStatioonTime = tt.CreatedDate;
+                    tw[0].OutStationTime = tt.UpdatedDate;
+                    tw[0].TaskTime = tt.TaskTime;
+                    tw[0].UpdatedDate = DateTime.Now;
+                    tw[0].UpdatedBy = tt.UpdatedBy;
+                }
+                _bal.SaveTrackingWip(tw[0]);
+                TrackingHistory th = new TrackingHistory();
+                th.PSN = tt.PSN;
+                th.MSN = tt.MSN;
+                th.WorkOrder = tt.WorkOrder;
+                th.PartsdrawingCode = tt.PartsdrawingCode;
+                th.PartsName = tt.PartsName;
+                th.PartsCode = tt.PartsCode;
+                th.BatchNumber = tt.BatchNumber;
+                th.StationName = "CHEXI";
+                th.QUANTITY = 1;
+                th.STATUS = tt.STATUS;
+                th.InStationTime = tt.CreatedDate;
+                th.OutStationTime = tt.UpdatedDate;
+                th.TaskTime = tt.TaskTime;
+                th.MachineName = tt.MachineName;
+                th.MachineType = tt.MachineType;
+                th.CreatedDate = DateTime.Now;
+                th.UpdatedBy = tt.UpdatedBy;
+                _bal.SaveTrackingHistory(th);
+                //工单加1
+                IList<WorkOrder> wos = _bal.FindWorkOrderInfo(tw[0].WorkOrder);
+                if(wos.Count>0)
+                {
+                    if(wos[0].QUANTITY==null)
+                    {
+                        wos[0].QUANTITY = 1;
+                    }
+                    else
+                    {
+                        wos[0].QUANTITY += 1;
+                    }                    
+                    _bal.SaveWorkOrderInfo(wos[0]);
+                }                
+                //如果不合格，直接入待处理品表
+                if (tt.STATUS == "F")
+                {
+                    UnsurenessProduct up = new UnsurenessProduct();
+                    up.PSN = th.PSN;
+                    up.MSN = th.MSN;
+                    up.WorkOrder = th.WorkOrder;
+                    up.STATUS = "0";
+                    up.StationName = "CHEXI";
+                    up.MEMO = "待处理";
+                    up.QUANTITY = th.QUANTITY;
+                    up.PartsdrawingCode = th.PartsdrawingCode;
+                    up.ProductName = th.PartsName;
+                    up.BatchNumber = th.BatchNumber;
+                    up.CreatedDate = DateTime.Now;
+                    _bal.SaveUnsurenessProduct(up);
+                }
+
+                _bal.RemoveTrackingTemp(tt.ID);
+                //保存到实时统计表
+                RealtimeStatistics rs = new RealtimeStatistics();
+                rs.PSN = th.PSN;
+                rs.MSN = th.MSN;
+                rs.WorkOrder = th.WorkOrder;
+                rs.StationName = th.StationName;
+                rs.MachineType = th.MachineType;
+                rs.MachineName = th.MachineName;
+                rs.STATUS = th.STATUS;
+                rs.QUANTITY = th.QUANTITY;
+                rs.OPERATOR = th.UpdatedBy;
+                if (wos.Count > 0)
+                {
+                    rs.OrderNumber = wos[0].OrderNumber;
+                }
+                rs.ProductName = th.PartsName;
+                rs.ProductCode = th.PartsCode;
+                IList<PartsdrawingCode> pc = _bal.FindPartsdrawingInfo(th.PartsdrawingCode);
+                if (pc.Count > 0)
+                {
+                    rs.CustName = pc[0].CustName;
+                }
+                rs.PartsdrawingCode = th.PartsdrawingCode;
+                _bal.SaveRealtimeStatistics(rs);
+                break;
+            default:
+                //表示扫描的是来料条码，因为来料条码长度为13位
+                if(inputdata.Length==13)
+                {
+                    IList<TrackingWip> tws = _bal.FindTrackingWip(inputdata);
+                    if(tws.Count>0)
+                    {
+                        IList<WorkOrder> wo = _bal.FindWorkOrderInfo(tws[0].WorkOrder);
+                        if(wo[0].WORKER!=_userInfo.UserCode)
+                        {
+                            throw new Exception("该料号非本床任务，应为" + wo[0].MachineName + "机床的任务！");
+                        }
+                        TrackingTemp ttemp = new TrackingTemp();
+                        ttemp.MSN = tws[0].MSN;
+                        ttemp.WorkOrder = tws[0].WorkOrder;
+                        ttemp.PartsdrawingCode = tws[0].PartsdrawingCode;
+                        ttemp.PartsName = tws[0].PartsName;
+                        ttemp.PartsCode = tws[0].PartsCode;
+                        ttemp.BatchNumber = tws[0].BatchNumber;
+                        ttemp.QUANTITY = tws[0].QUANTITY;
+                        ttemp.Step = "msn";
+                        if (wo.Count > 0)
+                        {
+                            ttemp.MachineName = wo[0].MachineName;
+                            ttemp.MachineType = wo[0].MachineType;
+                        }
+                        strID = _bal.SaveTrackingTemp(ttemp);
+                    }
+                    else
+                    {
+                        throw new Exception("该料号未打印产生产品条码，请先打印产品条码");
+                    }
+                }
+                else if(inputdata.Length==15)//表示扫描的是产品条码，因为产品条码是15位
+                {
+                    if (tt.Step != "start")
+                    {
+                        throw new Exception("请先扫描开工！");
+                    }
+                    //验证产品条码是否和来料条码匹配
+                    IList<TrackingWip> tws = _bal.FindTrackingWip(inputdata);
+                    TrackingTemp ttt = _bal.FindTrackingTemp(ID);
+                    if (tws.Count > 0)
+                    {
+                        if(ttt.MSN==tws[0].MSN)
+                        {
+                            ttt.PSN = inputdata;
+                            ttt.Step = "psn";
+                            _bal.SaveTrackingTemp(ttt);
+                        }
+                        else
+                        {
+                            throw new Exception("条码不匹配,请重新扫描条码");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("无此条码,请重新扫描条码");
+                    }
+                }
+                break;
+        }
+        return strID;
+    }
+
+    /// <summary>
+    /// 查询生产记录，根据作业员工号查询
+    /// </summary>
+    /// <param name="worker"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QuerySNTrackingInfo(string SN)
+    {
+        IList<TrackingHistory> objs = _bal.FindSNTrackingInfo(SN);
+        if (objs == null)
+            return "";
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (TrackingHistory o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkOrder));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StationName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));            
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    /// <summary>
+    /// 查询检验任务
+    /// </summary>
+    /// <param name="worker"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryQCTask()
+    {
+        IList<WorkOrder> objs = _bal.FindQCTask();
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (WorkOrder o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.OrderNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineType));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkerName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StartTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.EndTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CheckTime));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.InTime));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    /// <summary>
+    /// 查询检验记录
+    /// </summary>
+    /// <param name="worker"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryQCCheckHistory()
+    {
+        IList<TrackingHistory> objs = _bal.FindQCCheckHistory();
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (TrackingHistory o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.STATUS));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkOrder));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StationName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CreatedDate));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.CheckTime));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.InTime));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// 处理质检员的扫描数据
+    /// </summary>
+    /// <param name="inputdata"></param>
+    /// <param name="ID"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string DealwithQCScanData(string inputdata, string ID)
+    {
+        TrackingTemp tt = null;
+        string strID = string.Empty;
+        if (!string.IsNullOrEmpty(ID))
+        {
+            tt = _bal.FindTrackingTemp(ID);
+        }
+        switch (inputdata)
+        {
+            case "cancel":
+                _bal.RemoveTrackingTemp(ID);
+                break;
+            case "fail":
+                if(!string.IsNullOrEmpty(ID))
+                {
+                    throw new Exception("请进行下一步扫描!");
+                }
+                TrackingTemp ttempF = new TrackingTemp();
+                ttempF.Step = "fail";
+                ttempF.STATUS = "F";
+                strID = _bal.SaveTrackingTemp(ttempF); 
+                break;
+            case "pass":
+                if (!string.IsNullOrEmpty(ID))
+                {
+                    throw new Exception("请进行下一步扫描!");
+                }
+                TrackingTemp ttempP = new TrackingTemp();
+                ttempP.Step = "pass";
+                ttempP.STATUS = "P";
+                strID = _bal.SaveTrackingTemp(ttempP);
+                break;
+            default:
+                if (inputdata.Length == 15)//表示扫描的是产品条码，因为产品条码是15位
+                {
+                    if(tt==null)
+                    {
+                        throw new Exception("请先扫检验结果！");
+                    }
+                    if (tt.Step != "pass"&& tt.Step!="failcode")
+                    {
+                        throw new Exception("请先扫描不良代码！");
+                    }
+                    //更新trackingwip信息                                    
+                    
+                    IList<TrackingWip> tw = _bal.FindTrackingWip(inputdata);
+                    if (tw.Count > 0)
+                    {
+                        if(tw[0].STATUS=="F")
+                        {
+                            throw new Exception("此产品上一站已失败,禁止过本站");
+                        }
+                        tw[0].StationName = "QC";
+                        tw[0].STATUS = tt.STATUS;
+                        tw[0].InStatioonTime = tt.CreatedDate;
+                        tw[0].OutStationTime = DateTime.Now;                         
+                        tw[0].UpdatedDate = DateTime.Now;
+                        tw[0].UpdatedBy = tt.UpdatedBy;
+                    }
+                    else
+                    {
+                        throw new Exception("无此条码");
+                    }
+                    _bal.SaveTrackingWip(tw[0]);
+                    //保存检查记录
+                    TrackingHistory th = new TrackingHistory();
+                    th.PSN = tw[0].PSN;
+                    th.MSN = tw[0].MSN;
+                    th.WorkOrder = tw[0].WorkOrder;
+                    th.PartsdrawingCode = tw[0].PartsdrawingCode;
+                    th.PartsName = tw[0].PartsName;
+                    th.PartsCode = tw[0].PartsCode;
+                    th.BatchNumber = tw[0].BatchNumber;
+                    th.StationName = "QC";
+                    th.QUANTITY = 1;
+                    th.STATUS = tt.STATUS;
+                    if(tt.STATUS=="F")
+                    {
+                        th.EXCEPTION = tt.EXCEPTION;
+                    }
+                    th.InStationTime = tt.CreatedDate;
+                    th.OutStationTime = DateTime.Now;
+                    IList<WorkOrder> wo = _bal.FindWorkOrderInfo(tw[0].WorkOrder);
+                    th.MachineName = wo[0].MachineName;
+                    th.MachineType = wo[0].MachineType;
+                    th.CreatedDate = DateTime.Now;
+                    th.UpdatedBy = tt.UpdatedBy;
+                    _bal.SaveTrackingHistory(th);
+                    //如果不合格，直接入待处理品表
+                    if(tt.STATUS=="F")
+                    {
+                        UnsurenessProduct up = new UnsurenessProduct();
+                        up.PSN = th.PSN;
+                        up.MSN = th.MSN;
+                        up.WorkOrder = th.WorkOrder;
+                        up.FailCode = th.EXCEPTION.Split('^')[0].ToString();
+                        up.FailMemo = th.EXCEPTION.Split('^')[1].ToString();
+                        up.STATUS = "0";
+                        up.MEMO = "待处理";
+                        up.StationName = "QC";
+                        up.QUANTITY = th.QUANTITY;
+                        up.PartsdrawingCode = th.PartsdrawingCode;
+                        up.ProductName = th.PartsName;
+                        up.BatchNumber = th.BatchNumber;
+                        up.CreatedDate = DateTime.Now;
+                        _bal.SaveUnsurenessProduct(up);
+                    }
+                    _bal.RemoveTrackingTemp(tt.ID);
+                    //保存到实时统计表
+                    RealtimeStatistics rs = new RealtimeStatistics();
+                    rs.PSN = th.PSN;
+                    rs.MSN = th.MSN;
+                    rs.WorkOrder = th.WorkOrder;
+                    rs.StationName = th.StationName;
+                    rs.MachineType = th.MachineType;
+                    rs.MachineName = th.MachineName;
+                    rs.STATUS = th.STATUS;
+                    rs.QUANTITY = th.QUANTITY;
+                    rs.OPERATOR = th.UpdatedBy;
+                    if (wo.Count > 0)
+                    {
+                        rs.OrderNumber = wo[0].OrderNumber;
+                    }
+                    rs.ProductName = th.PartsName;
+                    rs.ProductCode = th.PartsCode;
+                    IList<PartsdrawingCode> pc = _bal.FindPartsdrawingInfo(th.PartsdrawingCode);
+                    if (pc.Count > 0)
+                    {
+                        rs.CustName = pc[0].CustName;
+                    }
+                    rs.PartsdrawingCode = th.PartsdrawingCode;
+                    _bal.SaveRealtimeStatistics(rs);
+                    break;
+                }
+                else//处理不良代码的情况
+                {
+                    if (tt.Step!="fail")
+                    {
+                        throw new Exception("请进行不合格的扫描!");
+                    }
+                    IList<FailItems> fis = _bal.FindFailItems(inputdata,"","");
+                    if (fis.Count > 0)
+                    {
+                        tt.EXCEPTION = fis[0].FailCode + "^" + fis[0].FailMemo;
+                        tt.Step = "failcode";
+                        _bal.SaveTrackingTemp(tt);
+                    }
+                }
+                 
+                break;
+        }
+        return strID;
+    }
+    /// <summary>
+    /// 查询待处理品记录
+    /// </summary>
+    /// <param name="worker"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryUnsurenessIn(string psn)
+    {
+        IList<UnsurenessProduct> objs = _bal.FindUnsurenessProduct(psn);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (UnsurenessProduct o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.PSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkOrder));
+            sb.Append(string.Format("<cell>{0}</cell>", o.FailCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.FailMemo));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StationName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveUnsurenessIn(string psn, string failcode, string failmemo)
+    {
+        _bal.SaveUnsurenessProduct(psn, failcode, failmemo);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string FindFailMemoByFailCode(string failcode)
+    {
+        IList<FailItems> fis = _bal.FindFailItems(failcode,"","");
+        if(fis.Count>0)
+        {
+            return fis[0].FailMemo;
+        }
+        else
+        {
+            throw new Exception("无此不良项代码"); 
+        }
+    }
+
+    /// <summary>
+    /// 查询待处理品记录
+    /// </summary>
+    /// <param name="worker"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryUnsurenessOut(string psn)
+    {
+        IList<UnsurenessProduct> objs = _bal.FindUnsurenessProductOut(psn);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (UnsurenessProduct o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.PSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkOrder));
+            sb.Append(string.Format("<cell>{0}</cell>", o.FailCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.FailMemo));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StationName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append(string.Format("<cell>{0}</cell>", o.STATUS));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveUnsurenessOut(string psn, string status, string statusmemo)
+    {
+        IList<UnsurenessProduct> up = _bal.FindUnsurenessProduct(psn);
+        if(up.Count>0)
+        {
+            up[0].STATUS = status;
+            up[0].MEMO = statusmemo;
+            _bal.SaveUnsurenessProduct(up[0]);
+        }
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindTemplateType()
+    {
+        return _bal.ListBindTemplateType();
+    }
+
+    /// <summary>
+    /// 查询模板设置内容
+    /// </summary>
+    /// <param name="worker"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryPrintSet(string templatetype)
+    {
+        IList<PrintSet> objs = _bal.FindPrintSet(templatetype);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (PrintSet o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.TemplateType));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ACTIVE));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));           
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string SavePrintSet(string templatetype, string templatecode, string isactive)
+    {
+         _bal.SavePrintSet(templatetype, templatecode, isactive);
+        return "OK";      
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemovePrintSet(string templatecode)
+    {
+        _bal.RemovePrintSet(templatecode);        
+    }
+
+    /// <summary>
+    /// 查询模板编号
+    /// </summary>
+    /// <param name="worker"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] QueryTemplateCodes(string templatetype)
+    {
+        IList<PrintSet> objs = _bal.FindPrintSet(templatetype);
+        TextValueInfo[] vts = new TextValueInfo[objs.Count];
+        for (var i = 0; i < objs.Count; i++)
+        {
+            vts[i] = new TextValueInfo();
+            vts[i].Value = objs[i].ID;
+            vts[i].Text = objs[i].ID;
+        }
+        return vts;
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SavePrintLabelTemplate(PrintSet obj)
+    {
+        _bal.SavePrintLabelTemplate(obj);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveCartonTemp(string partsdrawing,string qualitycode,string qty)
+    {
+        if(string.IsNullOrEmpty(partsdrawing)|string.IsNullOrEmpty(qualitycode)|string.IsNullOrEmpty(qty))
+        {
+            return;
+        }
+        CartonTemp ct = new CartonTemp();
+        ct.IP = WebHelper.GetClientIPv4Address();
+        ct.PartsdrawingCode = partsdrawing;
+        ct.QualityCode = qualitycode;
+        ct.QUANTITY = Convert.ToDecimal(qty);
+        _bal.SaveCartonTemp(ct);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemoveCartonTemp()
+    {
+        string ip = WebHelper.GetClientIPv4Address();
+        _bal.RemoveCartonTemp(ip);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryCartonTemp()
+    {
+        string ip = WebHelper.GetClientIPv4Address();
+        IList<CartonTemp>cts = _bal.FindCartonTemp(ip);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (CartonTemp o in cts)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QualityCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY.ToString()));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// 得到来料条码
+    /// </summary>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string GetCartonNO()
+    {
+        string res = "QZ" + "C";
+        string strYear = DateTime.Today.Year.ToString();
+        res += strYear.Substring(2);
+        string strMonth = DateTime.Today.Month.ToString().PadLeft(2, '0');
+        res += strMonth;
+        string strDay = DateTime.Today.Day.ToString().PadLeft(2, '0');
+        res += strDay;
+        string seq = PubHelper.GetHelper().GetNextID("SEQ_CARTON_NO").ToString().PadLeft(4, '0');
+        res += seq;
+        return res;
+    }
+    
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string SaveCartonInfo()
+    {
+        string carton = GetCartonNO();
+        string ip = WebHelper.GetClientIPv4Address();
+       _bal.SaveCartonInfo(ip, carton);
+        return carton;
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryCartonInfo()
+    {
+        DateTime dtstart = DateTime.Now.Date;
+        DateTime dtend = DateTime.Now;
+        IList<CartonInfo> cts = _bal.FindCartonInfo("","",this._userInfo.UserCode,dtstart,dtend);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (CartonInfo o in cts)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QualityCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY.ToString()));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    /// <summary>
+    /// 查询基本信息--yajiao
+    /// </summary>
+    /// <param name="code"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBaseByCode(string code)
+    {
+        return _bal.ListBaseByCode(code);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string ListCartonInfo(string sn,string starttime,string endtime)
+    {
+        DateTime dtstart = DateTime.Today.AddDays(-7);
+        DateTime dtend = DateTime.Now ;
+        if (!string.IsNullOrEmpty(starttime) && !string.IsNullOrEmpty(endtime))
+        {
+             dtstart = Convert.ToDateTime(starttime);
+             dtend = Convert.ToDateTime(endtime);
+        }
+        IList<CartonInfo> cts = _bal.FindCartonInfo(sn, "", "", dtstart, dtend);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (CartonInfo o in cts)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QualityCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY.ToString()));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryInMaterial(string workorder, string status, string MSN, string materialname, string custname, string starttime, string endtime, string batchnumber)
+    {
+        IList<MaterialStockHistory> objs = _bal.FindMaterialHistory(workorder, status, MSN, materialname, custname, starttime, endtime, batchnumber);
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (MaterialStockHistory o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CustName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CreatedDate));
+            IList<BasBase> ibb = _bal.FindBaseBySubCode(o.StockHouse);
+            sb.Append(string.Format("<cell>{0}</cell>", ibb[0].SubName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.DOCUMENTID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MaterialCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MaterialName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UNIT));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryOutMaterial(string workorder, string status, string MSN, string materialname, string custname, string starttime, string endtime, string batchnumber)
+    {
+        IList<MaterialStockHistory> objs = _bal.FindMaterialHistory(workorder, status, MSN, materialname, custname, starttime, endtime, batchnumber);
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (MaterialStockHistory o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkOrder));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MaterialCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MaterialName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            IList<BasBase> ibb = _bal.FindBaseBySubCode(o.StockHouse);
+            sb.Append(string.Format("<cell>{0}</cell>", ibb[0].SubName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.DOCUMENTID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));           
+            sb.Append(string.Format("<cell>{0}</cell>", o.MaterialHandler));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryInOutMaterial( string status, string materialname, string custname, string starttime, string endtime, string batchnumber)
+    {
+        IList<MaterialStock> objs = _bal.FindStockInfo( status,  materialname, custname, starttime, endtime, batchnumber);
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (MaterialStock o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MaterialCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MaterialName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BasQty));
+            sb.Append(string.Format("<cell>{0}</cell>", o.DOCUMENTID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    //[ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string QueryWorkOrder(WorkOrder workorder)
+    {
+        if(workorder.STATUS=="4")//4表示没有选择状态
+        {
+            workorder.STATUS = "";
+        }
+        IList<WorkOrder> objs = _bal.FindWorkOrderInfo(workorder);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (WorkOrder o in objs)
+        {
+            if (o.STATUS == "1")
+            {
+                sb.Append(string.Format("<row id='{0}' bgColor='green'>", o.WO));
+            }
+            else if (o.STATUS == "2")
+            {
+                sb.Append(string.Format("<row id='{0}' bgColor='yellow'>", o.WO));
+            }
+
+            else if (o.STATUS == "3")
+            {
+                sb.Append(string.Format("<row id='{0}' bgColor='grey'>", o.WO));
+            }
+            else
+            {
+                sb.Append(string.Format("<row id='{0}' >", o.WO));
+            }
+            //sb.Append(string.Format("<row id='{0}'>", o.WO));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineType));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkerName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StartTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.EndTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CheckTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.InTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryPartsDrawingNO(string partsdrawingno,string custcode,string starttime,string endtime)
+    {
+        if(custcode=="-1")
+        {
+            custcode = "";
+        }
+        IList<PartsdrawingCode> objs = _bal.FindPartsdrawingInfo(partsdrawingno, custcode, starttime, endtime);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (PartsdrawingCode o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CustName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CustCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QualityCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.AskQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.AskDate));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    /// <summary>
+    /// 查询钳工任务
+    /// </summary>
+    /// <param name="worker"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryFitterTask()
+    {
+        IList<WorkOrder> objs = _bal.FindQCTask();
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (WorkOrder o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.OrderNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineType));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkerName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StartTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.EndTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CheckTime));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.InTime));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    /// <summary>
+    /// 处理钳工的扫描数据
+    /// </summary>
+    /// <param name="inputdata"></param>
+    /// <param name="ID"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string DealwithQGScanData(string inputdata, string ID)
+    {
+        TrackingTemp tt = null;
+        string strID = string.Empty;
+        if (!string.IsNullOrEmpty(ID))
+        {
+            tt = _bal.FindTrackingTemp(ID);
+        }
+        switch (inputdata)
+        {
+            case "cancel":
+                _bal.RemoveTrackingTemp(ID);
+                break;
+            case "fail":
+                if (!string.IsNullOrEmpty(ID))
+                {
+                    throw new Exception("请进行下一步扫描!");
+                }
+                TrackingTemp ttempF = new TrackingTemp();
+                ttempF.Step = "fail";
+                ttempF.STATUS = "F";
+                strID = _bal.SaveTrackingTemp(ttempF);
+                break;
+            case "pass":
+                if (!string.IsNullOrEmpty(ID))
+                {
+                    throw new Exception("请进行下一步扫描!");
+                }
+                TrackingTemp ttempP = new TrackingTemp();
+                ttempP.Step = "pass";
+                ttempP.STATUS = "P";
+                strID = _bal.SaveTrackingTemp(ttempP);
+                break;
+            default:
+                if (inputdata.Length == 15)//表示扫描的是产品条码，因为产品条码是15位
+                {
+                    if (tt == null)
+                    {
+                        throw new Exception("请先扫检验结果！");
+                    }
+                    if (tt.Step != "pass" && tt.Step != "failcode")
+                    {
+                        throw new Exception("请先扫描不良代码！");
+                    }
+                    //更新trackingwip信息                                    
+
+                    IList<TrackingWip> tw = _bal.FindTrackingWip(inputdata);
+                    if (tw.Count > 0)
+                    {
+                        if(tw[0].STATUS=="F")
+                        {
+                            throw new Exception("此条码上一站已失败，禁止过本站");
+                        }
+                        tw[0].StationName = "QIANGONG";
+                        tw[0].STATUS = tt.STATUS;
+                        tw[0].InStatioonTime = tt.CreatedDate;
+                        tw[0].OutStationTime = DateTime.Now;
+                        tw[0].UpdatedDate = DateTime.Now;
+                        tw[0].UpdatedBy = tt.UpdatedBy;
+                    }
+                    else
+                    {
+                        throw new Exception("无此条码，请重新扫描条码");
+                    }
+                    _bal.SaveTrackingWip(tw[0]);
+                    //保存检查记录
+                    TrackingHistory th = new TrackingHistory();
+                    th.PSN = tw[0].PSN;
+                    th.MSN = tw[0].MSN;
+                    th.WorkOrder = tw[0].WorkOrder;
+                    th.PartsdrawingCode = tw[0].PartsdrawingCode;
+                    th.PartsName = tw[0].PartsName;
+                    th.PartsCode = tw[0].PartsCode;
+                    th.BatchNumber = tw[0].BatchNumber;
+                    th.StationName = "QIANGONG";
+                    th.QUANTITY = 1;
+                    th.STATUS = tt.STATUS;
+                    if (tt.STATUS == "F")
+                    {
+                        th.EXCEPTION = tt.EXCEPTION;
+                    }
+                    th.InStationTime = tt.CreatedDate;
+                    th.OutStationTime = DateTime.Now;
+                    IList<WorkOrder> wo = _bal.FindWorkOrderInfo(tw[0].WorkOrder);
+                    th.MachineName = wo[0].MachineName;
+                    th.MachineType = wo[0].MachineType;
+                    th.CreatedDate = DateTime.Now;
+                    th.UpdatedBy = tt.UpdatedBy;
+                    _bal.SaveTrackingHistory(th);
+                    //如果不合格，直接入待处理品表
+                    if (tt.STATUS == "F")
+                    {
+                        UnsurenessProduct up = new UnsurenessProduct();
+                        up.PSN = th.PSN;
+                        up.MSN = th.MSN;
+                        up.WorkOrder = th.WorkOrder;
+                        up.FailCode = th.EXCEPTION.Split('^')[0].ToString();
+                        up.FailMemo = th.EXCEPTION.Split('^')[1].ToString();
+                        up.STATUS = "0";
+                        up.MEMO = "待处理";
+                        up.StationName = "QIANGONG";
+                        up.QUANTITY = th.QUANTITY;
+                        up.PartsdrawingCode = th.PartsdrawingCode;
+                        up.ProductName = th.PartsName;
+                        up.BatchNumber = th.BatchNumber;
+                        up.CreatedDate = DateTime.Now;
+                        _bal.SaveUnsurenessProduct(up);
+                    }
+                    _bal.RemoveTrackingTemp(tt.ID);
+                    //保存到实时统计表
+                    RealtimeStatistics rs = new RealtimeStatistics();
+                    rs.PSN = th.PSN;
+                    rs.MSN = th.MSN;
+                    rs.WorkOrder = th.WorkOrder;
+                    rs.StationName = th.StationName;
+                    rs.MachineType = th.MachineType;
+                    rs.MachineName = th.MachineName;
+                    rs.STATUS = th.STATUS;
+                    rs.QUANTITY = th.QUANTITY;
+                    rs.OPERATOR = th.UpdatedBy;
+                    if (wo.Count > 0)
+                    {
+                        rs.OrderNumber = wo[0].OrderNumber;
+                    }
+                    rs.ProductName = th.PartsName;
+                    rs.ProductCode = th.PartsCode;
+                    IList<PartsdrawingCode> pc = _bal.FindPartsdrawingInfo(th.PartsdrawingCode);
+                    if (pc.Count > 0)
+                    {
+                        rs.CustName = pc[0].CustName;
+                    }
+                    rs.PartsdrawingCode = th.PartsdrawingCode;
+                    _bal.SaveRealtimeStatistics(rs);
+                    break;
+                }
+                else//处理不良代码的情况
+                {
+                    if (tt.Step != "fail")
+                    {
+                        throw new Exception("请进行不合格的扫描!");
+                    }
+                    IList<FailItems> fis = _bal.FindFailItems(inputdata, "", "");
+                    if (fis.Count > 0)
+                    {
+                        tt.EXCEPTION = fis[0].FailCode + "^" + fis[0].FailMemo;
+                        tt.Step = "failcode";
+                        _bal.SaveTrackingTemp(tt);
+                    }
+                }
+
+                break;
+        }
+        return strID;
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public TextValueInfo[] ListBindFailType()
+    {
+        return _bal.ListBaseByCode("QZB17040011");//不良类别
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryFailItems(string failcode, string failtype)
+    {
+        if(failtype=="-1")
+        {
+            failtype = "";
+        }
+        IList<FailItems> objs = _bal.FindFailItems(failcode, failtype);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        foreach (FailItems o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.FailCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.FailCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.FailType));
+            sb.Append(string.Format("<cell>{0}</cell>", o.FailMemo));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO1));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            //sb.Append(string.Format("<cell>View^javascript:MySite.Runner.showDetail({0})^_self</cell>", log.ID));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemoveFailItems(string failcode)
+    {
+        _bal.RemoveFailItems(failcode);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveFailItems(FailItems bbase)
+    {
+        _bal.SaveFailItems(bbase);
+    }
+    /// <summary>
+    /// 查询待审核品记录
+    /// </summary>
+    /// <param name="worker"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryCheckUnsureness(string psn)
+    {
+        IList<UnsurenessProduct> objs = _bal.FindCheckUnsurenessProduct(psn);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (UnsurenessProduct o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.PSN));
+            sb.Append(string.Format("<cell>{0}</cell>", ""));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkOrder));
+            sb.Append(string.Format("<cell>{0}</cell>", o.FailCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.FailMemo));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StationName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveCheckUnsureness(string psn, string result)
+    {
+        _bal.SaveCheckUnsureness(psn,result);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    //[ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string QueryCapacityStatistics(WorkOrder workorder)
+    {
+        if (workorder.STATUS == "4")//4表示没有选择状态
+        {
+            workorder.STATUS = "";
+        }
+        IList<WorkOrder> objs = _bal.FindWorkOrderInfo(workorder);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (WorkOrder o in objs)
+        {             
+            sb.Append(string.Format("<row id='{0}'>", o.WO));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineType));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkerName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StartTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.EndTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CheckTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.InTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryOutNotice(string orderno, string parsdrawingno,string status)
+    {
+        IList<OrderDetail> objs = _bal.FindOrderInfo(orderno, parsdrawingno, status);
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+
+        foreach (OrderDetail o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", ""));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderNo));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.InQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OutDate));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CreatedDate != null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveOutNotice(string id,string res)
+    {
+        IList<OrderDetail> obj = _bal.FindOrderInfo("", "", "", "", "", id);
+        if (obj.Count > 0)
+        {
+            if (res == "1")
+            {
+                obj[0].STATUS = "2";
+                obj[0].MEMO = "发货通知";
+                _bal.SaveOrderInfo(obj[0]);
+            }
+        }
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryOrderFinish(string orderno, string parsdrawingno)
+    {
+        IList<OrderDetail> objs = _bal.FindOrderInfo(orderno, parsdrawingno,"1");
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+
+        foreach (OrderDetail o in objs)
+        {
+            if (o.OrderQuantity == o.InQuantity)//筛选已完成订单
+            {
+                sb.Append(string.Format("<row id='{0}'>", o.ID));
+                sb.Append(string.Format("<cell>{0}</cell>", o.OrderNo));
+                sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+                sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+                sb.Append(string.Format("<cell>{0}</cell>", o.OrderQuantity));
+                sb.Append(string.Format("<cell>{0}</cell>", o.InQuantity));
+                sb.Append(string.Format("<cell>{0}</cell>", o.OutDate));
+                sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+                sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+                sb.Append("</row>");
+            }
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryOrderProducting(string orderno, string parsdrawingno)
+    {
+        IList<OrderDetail> objs = _bal.FindOrderInfo(orderno, parsdrawingno,"1");
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+
+        foreach (OrderDetail o in objs)
+        {
+            if (o.OrderQuantity != o.InQuantity)//筛选未完成订单
+            {
+                sb.Append(string.Format("<row id='{0}'>", o.ID));
+                sb.Append(string.Format("<cell>{0}</cell>", o.OrderNo));
+                IList<WorkOrder> wo = _bal.FindWorkOrderByPartsdrawingCode(o.PartsdrawingCode);
+                if(wo.Count>0)
+                {
+                    sb.Append(string.Format("<cell>{0}</cell>", wo[0].WO));
+                }
+                else
+                {
+                    sb.Append(string.Format("<cell>{0}</cell>",""));
+                }
+                sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+                sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+                sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+                sb.Append(string.Format("<cell>{0}</cell>", o.OrderQuantity));
+                sb.Append(string.Format("<cell>{0}</cell>", o.InQuantity));
+                sb.Append(string.Format("<cell>{0}</cell>", o.OutDate));
+                //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+                sb.Append(string.Format("<cell>{0}</cell>", o.CreatedDate == null ? o.UpdatedDate : o.CreatedDate));
+                sb.Append("</row>");
+            }
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryStandByOutInfo()
+    {
+        IList<OrderDetail> objs = _bal.FindOrderInfo("","","2");
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+
+        foreach (OrderDetail o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.ID));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderNo));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CustName));           
+            sb.Append(string.Format("<cell>{0}</cell>", o.OrderQuantity));            
+            int inqty = 0;
+            int outqty = 0;
+            if (o.InQuantity!=null)
+            {
+                inqty = (int)o.InQuantity;
+            }
+            if(o.OutQuantity!=null)
+            {
+                outqty = (int)o.OutQuantity;
+            }
+            sb.Append(string.Format("<cell>{0}</cell>", inqty));
+            sb.Append(string.Format("<cell>{0}</cell>", outqty));
+            sb.Append(string.Format("<cell>{0}</cell>", inqty-outqty));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryOrderPublish()
+    {
+        IList<OrderDetail> objs = _bal.FindOrderInfo("","","1");
+        //IList<OrderDetail> objs2 = _bal.FindOrderInfo("", "", "2");
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+
+        foreach (OrderDetail o in objs)
+        {
+            //过滤掉已经建立的工单
+            IList<WorkOrder> wos = _bal.FindWorkOrderByPartsdrawingCode(o.PartsdrawingCode);
+            if (wos == null || wos.Count < 1)
+            {
+                sb.Append(string.Format("<row id='{0}'>", o.ID));
+                sb.Append(string.Format("<cell>{0}</cell>", o.OrderNo));
+                sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+                sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+                sb.Append(string.Format("<cell>{0}</cell>", o.CustName));
+                sb.Append(string.Format("<cell>{0}</cell>", o.OrderQuantity));
+                sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));                
+                sb.Append(string.Format("<cell>{0}</cell>", o.OutQuantity));                
+                sb.Append(string.Format("<cell>{0}</cell>", o.OutDate));
+                //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+                //sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));
+                sb.Append("</row>");
+            }
+        
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    //[ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string QueryWorkOrderMain()
+    {
+        WorkOrder wo = new WorkOrder();
+        wo.STATUS = "1";
+        IList<WorkOrder> objs = _bal.FindWorkOrderInfo(wo);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (WorkOrder o in objs)
+        {              
+            sb.Append(string.Format("<row id='{0}'>", o.WO));
+            //sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkerName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StartTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.EndTime));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryQualityInfo(string custname,string partsdrawing, string startT,string endT)
+    {
+        DateTime dtstart = DateTime.Now.Date;
+        DateTime dtend = DateTime.Now;
+        WorkOrder wo = new WorkOrder();
+        wo.CustName = custname;
+        wo.PartsdrawingCode = partsdrawing;
+        if (!string.IsNullOrEmpty(startT))
+        {
+            wo.StartTime = Convert.ToDateTime(startT);
+        }
+        if(!string.IsNullOrEmpty(endT))
+        {
+            wo.EndTime = Convert.ToDateTime(endT);
+        }
+        IList<WorkOrder> objs = _bal.FindWorkOrderInfo(wo);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (WorkOrder o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CustName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            int failcount = _bal.FindFailCountbyWorkOrder(o.WO, "");
+            sb.Append(string.Format("<cell>{0}</cell>", failcount));
+            string failrate = (Math.Round((double)(failcount*100 / (o.QUANTITY == null ? 1 : o.QUANTITY)),2)).ToString()+"%";
+            sb.Append(string.Format("<cell>{0}</cell>", failrate));             
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    /// <summary>
+    /// 查询待处理品记录
+    /// </summary>
+    /// <param name="worker"></param>
+    /// <returns></returns>
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryUnsurenessHistory(string psn, string partsdrawing, string wo, string status, string startT, string endT)
+    {
+        UnsurenessHistory uh = new UnsurenessHistory();
+        uh.PSN = psn;
+        uh.PartsdrawingCode = partsdrawing;
+        uh.WorkOrder = wo;
+        uh.STATUS = status;
+        if (!string.IsNullOrEmpty(startT))
+        {
+            uh.CreatedDate = Convert.ToDateTime(startT);
+        }
+        if (!string.IsNullOrEmpty(endT))
+        {
+            uh.UpdatedDate = Convert.ToDateTime(endT);
+        }
+        IList<UnsurenessHistory> objs = _bal.FindUnsurenessHistory(uh);// _bal.FindUnsurenessProductOut(psn);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (UnsurenessHistory o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.PSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WorkOrder));
+            sb.Append(string.Format("<cell>{0}</cell>", o.FailMemo));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.StationName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MSN));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedDate == null ? o.CreatedDate : o.UpdatedDate));         
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryYieldInfo(string custname, string partsdrawing, string startT, string endT)
+    {
+        DateTime dtstart = DateTime.Now.Date;
+        DateTime dtend = DateTime.Now;
+        WorkOrder wo = new WorkOrder();
+        wo.CustName = custname;
+        wo.PartsdrawingCode = partsdrawing;
+        if (!string.IsNullOrEmpty(startT))
+        {
+            wo.StartTime = Convert.ToDateTime(startT);
+        }
+        if (!string.IsNullOrEmpty(endT))
+        {
+            wo.EndTime = Convert.ToDateTime(endT);
+        }
+        IList<WorkOrder> objs = _bal.FindWorkOrderInfo(wo);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (WorkOrder o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CustName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BatchNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QUANTITY));
+            int[] fails = _bal.FindYieldCountInfo("",o.PartsdrawingCode);
+            int passcount = (int)(o.QUANTITY == null ? 0 : o.QUANTITY) - fails[0];
+            sb.Append(string.Format("<cell>{0}</cell>", passcount));
+            sb.Append(string.Format("<cell>{0}</cell>", fails[0]));
+            sb.Append(string.Format("<cell>{0}</cell>", fails[1]));
+            sb.Append(string.Format("<cell>{0}</cell>", fails[2]));
+            sb.Append(string.Format("<cell>{0}</cell>", fails[3]));
+            string passrate = (Math.Round((double)(passcount * 100 / (o.QUANTITY == null ? 1 : o.QUANTITY)), 2)).ToString() + "%";
+            sb.Append(string.Format("<cell>{0}</cell>", passrate));
+            string failrate = (Math.Round((double)(fails[0] * 100 / (o.QUANTITY == null ? 1 : o.QUANTITY)), 2)).ToString() + "%";
+            sb.Append(string.Format("<cell>{0}</cell>", failrate));
+            string returnrate = (Math.Round((double)(fails[1] * 100 / (o.QUANTITY == null ? 1 : o.QUANTITY)), 2)).ToString() + "%";
+            sb.Append(string.Format("<cell>{0}</cell>", returnrate));
+            string secpassrate = (Math.Round((double)(fails[2] * 100 / (o.QUANTITY == null ? 1 : o.QUANTITY)), 2)).ToString() + "%";
+            sb.Append(string.Format("<cell>{0}</cell>", secpassrate));
+            string dicardrate = (Math.Round((double)(fails[3] * 100 / (o.QUANTITY == null ? 1 : o.QUANTITY)), 2)).ToString() + "%";
+            sb.Append(string.Format("<cell>{0}</cell>", dicardrate));            
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryWIPInfo()
+    {
+        IList<WorkOrder> objs = _bal.FindWorkOrderByStatus("1", true);//查询运行中的工单
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        RealtimeStatistics rs = new RealtimeStatistics();
+        foreach (WorkOrder o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.WO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.PartsdrawingCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.ProductName));           
+            sb.Append(string.Format("<cell>{0}</cell>", o.PlanQuantity));
+            rs.WorkOrder = o.WO;
+            rs.StationName = "CHEXI";
+            rs.STATUS = "P";
+            int chexipass = _bal.FindCountFromRealtimeStatistics(rs);
+            rs.STATUS = "F";
+            int chexifail = _bal.FindCountFromRealtimeStatistics(rs);
+            rs.StationName = "QIANGONG";
+            int qiangongfail = _bal.FindCountFromRealtimeStatistics(rs);
+            rs.STATUS = "P";
+            int qiangongpass = _bal.FindCountFromRealtimeStatistics(rs);
+            rs.StationName = "QC";
+            int qcpass = _bal.FindCountFromRealtimeStatistics(rs);
+            rs.STATUS = "F";
+            int qcfail = _bal.FindCountFromRealtimeStatistics(rs);
+            rs.StationName = "INSTOCK";
+            rs.STATUS = "";
+            int instockqty = _bal.FindCountFromRealtimeStatistics(rs);
+            sb.Append(string.Format("<cell>{0}</cell>", chexipass));
+            sb.Append(string.Format("<cell>{0}</cell>", chexifail));            
+            sb.Append(string.Format("<cell>{0}</cell>", qiangongpass));
+            sb.Append(string.Format("<cell>{0}</cell>", qiangongfail));
+            sb.Append(string.Format("<cell>{0}</cell>", qcpass));
+            sb.Append(string.Format("<cell>{0}</cell>", qcfail));
+            sb.Append(string.Format("<cell>{0}</cell>", instockqty));            
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveEquipmentInfo(BasEquipment obj)
+    {
+        _bal.SaveBasEquipment(obj);
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemoveEquipmentInfo(string code)
+    {
+        _bal.RemoveBasEquipment(code);
+    }
+   
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryEquipmentInfo(string code, string name)
+    {
+        IList<BasEquipment> objs = _bal.FindBasEquipment(code, name);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;        
+        foreach (BasEquipment o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.CODE));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CODE));
+            sb.Append(string.Format("<cell>{0}</cell>", o.COMPANY));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineName));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MachineType)); 
+            sb.Append(string.Format("<cell>{0}</cell>", o.AxisNumber));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MODEL));
+            sb.Append(string.Format("<cell>{0}</cell>", o.POWER));
+            sb.Append(string.Format("<cell>{0}</cell>", o.LOCATION));
+            sb.Append(string.Format("<cell>{0}</cell>", o.STATUS));
+            sb.Append(string.Format("<cell>{0}</cell>", o.OutCode));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UseDate));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CreatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void SaveMaterielInfo(BasMateriel obj)
+    {
+        _bal.SaveBasMateriel(obj);
+    }
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public void RemoveMaterielInfo(string code)
+    {
+        _bal.RemoveBasMateriel(code, "");//.RemoveBasEquipment(code);
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Xml)]
+    public string QueryMaterielInfo(string qmateriel, string cmateriel)
+    {
+        IList<BasMateriel> objs = _bal.FindBasMateriel(cmateriel, qmateriel, "");//.FindBasEquipment(code, name);
+        StringBuilder sb = new StringBuilder();
+        sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        sb.Append("<rows>");
+        string strstatus = string.Empty;
+        foreach (BasMateriel o in objs)
+        {
+            sb.Append(string.Format("<row id='{0}'>", o.CPARTNO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.QPARTNO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CPARTNO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.NAME));
+            sb.Append(string.Format("<cell>{0}</cell>", o.BasQty));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CUSTOMER));
+            sb.Append(string.Format("<cell>{0}</cell>", o.MEMO));
+            sb.Append(string.Format("<cell>{0}</cell>", o.UpdatedBy));
+            sb.Append(string.Format("<cell>{0}</cell>", o.CreatedDate));
+            sb.Append("</row>");
+        }
+        sb.Append("</rows>");
+        return sb.ToString();
+    }
+
+    [WebMethod(true)]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public string QueryCustcodeByName(string name)
+    {
+        return _bal.ListCustCodeByName(name);//.RemoveBasEquipment(code);
+    }
+}

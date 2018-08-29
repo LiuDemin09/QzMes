@@ -1,0 +1,99 @@
+﻿ #Container{
+            width:1080px;
+            margin:0 auto;/*设置整个容器在浏览器中水平居中*/
+            padding-left:30px;
+            /*  background:#CF3;
+          filter:alpha(Opacity=80);
+            opacity: 0.2;
+            background-color: rgba(0,0,0,0.1);*/
+        }
+ #Header{
+    height:50px;
+   /* background:#093;
+    filter:alpha(Opacity=80);opacity: 0.1;
+    background-color: #f00;*/
+    position: relative;
+} 
+.logo{
+    position: absolute;
+    width:100%;
+    height:100%;
+    left:35%;
+    top:10%; 
+    font-size:xx-large;
+    color:white;
+}
+.machineInfo{
+     height:440px;
+    width:31%;
+    margin:0px;/*设置元素跟其他元素的距离为20像素*/
+    float:left;/*设置浮动，实现多列效果，div+Css布局中很重要的*/
+    /*background:#90C;*/
+    border:1px solid rgba(0,0,1,1);
+}
+.machinestyle{
+    width: 35%;
+    height: 48%;
+    margin: 0 auto;
+    float:left;
+     /*border:1px solid rgba(0,0,0,1);*/
+}
+.curstatusstyle{
+    width: 63%;
+    height: 48%;
+    margin: 0 auto;
+     float:left;
+     /*border:1px solid rgba(0,0,0,1);*/
+}
+.operatorstyle{
+    width: 35%;
+    height: 48%;
+    margin: 0 auto;
+    float:left;
+    /*border:1px solid rgba(0,0,0,1);*/
+}
+.machineoutstyle{
+    width: 63%;
+    height: 48%;
+    margin: 0 auto;
+     float:left;
+    /*border:1px solid rgba(0,0,0,1);*/
+}
+#Footer{
+    height:40px;
+   /* background:#f00;*/
+    margin-top:0px;
+    color:white;
+}
+.Clear{
+    clear:both;
+}
+.machinename{
+    width: 100%;
+    height: 20px;
+    margin: 0 auto;
+     float:left;
+     font-size:20px;
+     color:#ffffff;
+     text-align:center;
+    /*border:1px solid rgba(0,0,0,1);*/
+}
+.machineimage{
+   width:100%;
+   height:50%
+}
+.operatorimage{
+   width:100%;
+   height:80%
+}
+.textstyle{
+    padding-top:20px;
+    width:100%;
+     float:left;
+     font-size:20px;
+     color:#ffffff;
+     text-align:left;
+     word-wrap:break-word; 
+     word-break:break-all;
+    /*border:1px solid rgb(255, 0, 0);*/
+}

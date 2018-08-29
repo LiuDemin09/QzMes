@@ -1,0 +1,148 @@
+﻿using System;
+using System.Collections.Generic;
+using Freeworks.ORM.Core;
+
+namespace DAL
+{
+    [Serializable()]
+    [OrmClassAttribute(TableName = "MES_MASTER.BAS_CUSTOM", IsView = false, PrimaryKeys = "",
+    PrimaryProperties = "")]
+    public class BasCustom : ICloneable
+    {
+        #region Member Variables		
+        public static BasCustomMeta Meta = new BasCustomMeta();
+        #endregion
+
+        #region constructor
+        public BasCustom()
+        {
+            ///Initialize Child collection objects
+        }
+        #endregion
+
+        #region Property Variables		
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "CODE", SqlType = "VARCHAR2", Length = 40)]
+        public string CODE { set; get; }
+
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "NAME", SqlType = "VARCHAR2", Length = 400)]
+        public string NAME { set; get; }
+
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "ADDRESS", SqlType = "VARCHAR2", Length = 400)]
+        public string ADDRESS { set; get; }
+
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "TRANS_TYPE", SqlType = "VARCHAR2", Length = 40)]
+        public string TransType { set; get; }
+
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "RECEIVE_AREA", SqlType = "VARCHAR2", Length = 400)]
+        public string ReceiveArea { set; get; }
+
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "CONTACT", SqlType = "VARCHAR2", Length = 40)]
+        public string CONTACT { set; get; }
+
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "MOBILE", SqlType = "VARCHAR2", Length = 40)]
+        public string MOBILE { set; get; }
+
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "FAX", SqlType = "VARCHAR2", Length = 40)]
+        public string FAX { set; get; }
+
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "INVOICE_NAME", SqlType = "VARCHAR2", Length = 200)]
+        public string InvoiceName { set; get; }
+
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "INVOICE_NUMBER", SqlType = "VARCHAR2", Length = 40)]
+        public string InvoiceNumber { set; get; }
+
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "MEMO", SqlType = "VARCHAR2", Length = 200)]
+        public string MEMO { set; get; }
+
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "CREATED_DATE", SqlType = "DATE", Length = 0)]
+        public DateTime? CreatedDate { set; get; }
+
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "UPDATED_DATE", SqlType = "DATE", Length = 0)]
+        public DateTime? UpdatedDate { set; get; }
+
+        [OrmPropertyAttribute(IsChild = false, IsPK = false, IsFK = false, IsIdentity = false, IsUnique = false,
+        AllowNull = true, ColumnName = "UPDATED_BY", SqlType = "VARCHAR2", Length = 40)]
+        public string UpdatedBy { set; get; }
+
+        #endregion
+        #region "Child properties"
+        #endregion
+
+        #region extension methods
+        public Object Clone()
+        {
+            BasCustom obj = new BasCustom();
+
+
+            obj.CODE = this.CODE;
+            obj.NAME = this.NAME;
+            obj.ADDRESS = this.ADDRESS;
+            obj.TransType = this.TransType;
+            obj.ReceiveArea = this.ReceiveArea;
+            obj.CONTACT = this.CONTACT;
+            obj.MOBILE = this.MOBILE;
+            obj.FAX = this.FAX;
+            obj.InvoiceName = this.InvoiceName;
+            obj.InvoiceNumber = this.InvoiceNumber;
+            obj.MEMO = this.MEMO;
+            obj.CreatedDate = this.CreatedDate;
+            obj.UpdatedDate = this.UpdatedDate;
+            obj.UpdatedBy = this.UpdatedBy;
+
+            return obj;
+        }
+
+        public void CopyTo(BasCustom obj)
+        {
+            obj.CODE = this.CODE;
+            obj.NAME = this.NAME;
+            obj.ADDRESS = this.ADDRESS;
+            obj.TransType = this.TransType;
+            obj.ReceiveArea = this.ReceiveArea;
+            obj.CONTACT = this.CONTACT;
+            obj.MOBILE = this.MOBILE;
+            obj.FAX = this.FAX;
+            obj.InvoiceName = this.InvoiceName;
+            obj.InvoiceNumber = this.InvoiceNumber;
+            obj.MEMO = this.MEMO;
+            obj.CreatedDate = this.CreatedDate;
+            obj.UpdatedDate = this.UpdatedDate;
+            obj.UpdatedBy = this.UpdatedBy;
+        }
+        #endregion
+    }
+
+    #region "Metadata struct"
+    public sealed class BasCustomMeta
+    {
+        public StringPropertyMeta CODE = new StringPropertyMeta("\"CODE\"");
+        public StringPropertyMeta NAME = new StringPropertyMeta("\"NAME\"");
+        public StringPropertyMeta ADDRESS = new StringPropertyMeta("\"ADDRESS\"");
+        public StringPropertyMeta TransType = new StringPropertyMeta("\"TRANS_TYPE\"");
+        public StringPropertyMeta ReceiveArea = new StringPropertyMeta("\"RECEIVE_AREA\"");
+        public StringPropertyMeta CONTACT = new StringPropertyMeta("\"CONTACT\"");
+        public StringPropertyMeta MOBILE = new StringPropertyMeta("\"MOBILE\"");
+        public StringPropertyMeta FAX = new StringPropertyMeta("\"FAX\"");
+        public StringPropertyMeta InvoiceName = new StringPropertyMeta("\"INVOICE_NAME\"");
+        public StringPropertyMeta InvoiceNumber = new StringPropertyMeta("\"INVOICE_NUMBER\"");
+        public StringPropertyMeta MEMO = new StringPropertyMeta("\"MEMO\"");
+        public DatetimePropertyMeta CreatedDate = new DatetimePropertyMeta("\"CREATED_DATE\"");
+        public DatetimePropertyMeta UpdatedDate = new DatetimePropertyMeta("\"UPDATED_DATE\"");
+        public StringPropertyMeta UpdatedBy = new StringPropertyMeta("\"UPDATED_BY\"");
+    }
+    #endregion
+}
+
